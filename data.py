@@ -1,25 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import sys, re, json
+import sys, re, json, string
 
 import enchant
 import nltk
 from codecs import open
+from guess_language import guessLanguage
 
 from util import (get_file_names, 
                   extract_title, 
                   make_capitalized_title, 
                   get_document_content, 
-                  is_capitalized)
+                  is_monocase, 
+                  normalize_title)
 
 from ground_truth import (articles, prepositions, conjunctions)
-
-def is_capitalized(s):
-    for w in s.split():
-        if w not in articles and w not in prepositions and w not in conjunctions:
-            if w[0] != w[0].upper():
-                return False
-    return True
 
 def print_filenames_and_titles():
     """print title each per one line from the corpus"""
@@ -28,7 +23,13 @@ def print_filenames_and_titles():
     titles = []
     for fname in get_file_names(paths):
         title = extract_title(fname)
-        if not is_capitalized(title):
+        
+        if not title: # no title
+            continue
+            
+        title = normalize_title(title)
+        
+        if not is_monocase(nltk.word_tokenize(title)) and guessLanguage(title) == "en": #is not monocase and is English
             print json.dumps([fname, unicode(title).encode("utf8")])
     
 
@@ -80,26 +81,66 @@ def get_cap_in_dict_label(word, **kwargs):
         return "CAP_IN_DICT"
     else:
         return "OTHER"
+
+
+exclude = unicode(string.punctuation + ''.join([str(i) for i in xrange(10)]))
+table = {ord(c): None
+         for c in exclude}
+
+def get_allupper_label(word, **kwargs):
+    """
+    If the letters in word is all uppercased
+    
+    >>> get_allupper_label(u'U.S.')
+    'ALL_UPPER'
+    >>> get_allupper_label(u'Ad')
+    'OTHER'
+    >>> get_allupper_label(u'123..4')
+    'OTHER'
+    >>> get_allupper_label(u'HAO123')
+    'ALL_UPPER'
+    >>> # get_allupper_label(u'FIIs')    
+    """
+    word = word.translate(table) # Remove punctuations + numbers
+    if word and word.upper() == word:
+        return "ALL_UPPER"
+    else:
+        return "OTHER"
     
 def get_label(word, **kwargs):
-    if word[0].isalpha() and word[0] == word[0].upper():
+    """
+    >>> get_label(u'GCC')
+    'I'
+    >>> get_label(u'Kinder')
+    'C'
+    >>> get_label(u'213')
+    'I'
+    >>> get_label(u'lower')
+    'L'
+    >>> get_label(u'U.S.')
+    'I'
+    >>> get_label(u'\\'s')
+    'I'
+    >>> # get_label(u'in-Flight')
+    """
+    if word.upper() == word:
+        return "I"
+    elif word[0].isalpha() and word[0] == word[0].upper():
         return "C" 
     elif word[0].isalpha():
         return "L"
     else:
         return "I"
+        # raise ValueError("Invalid value `%s`" %(word))
 
 def convert_to_trainable_format(raw_title, doc = None):
     """
     Given some title(before capitalization), return the trainable format
     
-    >>> convert_to_trainable_format("CIS FMs hold summit in Belarus on Oct 10")
-    [('CIS', 'HEAD', 'BEGINS_WITH_ALPHA', 'OTHER', 'OTHER', 'OTHER', 'C'), ('FMs', 'OTHER', 'BEGINS_WITH_ALPHA', 'OTHER', 'OTHER', 'OTHER', 'C'), ('Hold', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Summit', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('in', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Belarus', 'OTHER', 'BEGINS_WITH_ALPHA', 'OTHER', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'C'), ('on', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Oct', 'OTHER', 'BEGINS_WITH_ALPHA', 'OTHER', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'C'), ('10', 'OTHER', 'OTHER', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'I')]
-    >>> convert_to_trainable_format("FTSE 100 watch: Footsie hits fresh lows on global growth concerns")
-    [('FTSE', 'HEAD', 'BEGINS_WITH_ALPHA', 'OTHER', 'OTHER', 'OTHER', 'C'), ('100', 'OTHER', 'OTHER', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'I'), ('Watch', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), (':', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'I'), ('Footsie', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'C'), ('Hits', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Fresh', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Lows', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('on', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Global', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Growth', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L'), ('Concerns', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'L')]
+    >>> c = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10")
+    >>> c = convert_to_trainable_format(u"FTSE 100 watch: Footsie hits fresh lows on global growth concerns")    
     >>> doc = open("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1", "r", "utf8").read()
-    >>> convert_to_trainable_format("Why oil prices will be 'robust' long-term: Shell CEO", doc)
-    [('Why', 'HEAD', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'C'), ('Oil', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'L'), ('Prices', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'L'), ('Will', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'L'), ('Be', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'L'), ("'robust", 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'I'), ("'", 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'I'), ('Long-term', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'OTHER', 'L'), (':', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'OTHER', 'I'), ('Shell', 'OTHER', 'BEGINS_WITH_ALPHA', 'LOWER_IN_DICT', 'UPPER_IN_DICT', 'CAP_IN_DICT', 'IN_DOC_CAP', 'C'), ('CEO', 'OTHER', 'BEGINS_WITH_ALPHA', 'OTHER', 'UPPER_IN_DICT', 'OTHER', 'IN_DOC_CAP', 'C')]
+    >>> c = convert_to_trainable_format(u"Why oil prices will be 'robust' long-term: Shell CEO", doc)    
     
     Where    
     - the title word after being treated as title
@@ -108,8 +149,8 @@ def convert_to_trainable_format(raw_title, doc = None):
     - Lower case in dictionary or not
     - Upper case in dictionary or not
     - Capitalized in dictionary or not
+    - Is all upper-case after removing the non-alphabetic symbols
     - Appear in document as capitalized or not(optional)
-    
     - the class label, "C" as "should be capitalized" and "L" should be "lowered"
     """
     words = nltk.word_tokenize(raw_title)    
@@ -118,16 +159,20 @@ def convert_to_trainable_format(raw_title, doc = None):
     feature_extractors = [get_alpha_label,
                           get_lower_in_dict_label,
                           get_upper_in_dict_label, 
-                          get_cap_in_dict_label]
+                          get_cap_in_dict_label, 
+                          get_allupper_label]
     
+    pos_tags = [tag 
+                for _, tag in nltk.pos_tag(words)] # pos tags
+
     if doc:
         feature_extractors.append(appear_capitalized_indoc_label)
         
     head_title_word , head_word = title_words[0], words[0]
     
-    return [(head_title_word, "HEAD") + tuple([fe(head_word, doc = doc) for fe in feature_extractors]) + (get_label(head_word), )] + \
-        [(title_word, "OTHER") + tuple([fe(word, doc = doc) for fe in feature_extractors]) + (get_label(word), )
-         for title_word, word in zip(title_words[1:], words[1:])]
+    return [(head_title_word, "HEAD") + tuple([fe(head_word, doc = doc) for fe in feature_extractors]) + (pos_tags[0], get_label(head_word), )] + \
+        [(title_word, "OTHER") + tuple([fe(word, doc = doc) for fe in feature_extractors]) + (pos_tags[i], get_label(word), )
+         for i, title_word, word in zip(xrange(1, len(title_words)), title_words[1:], words[1:])]
 
 def load_data(start, end, path = "fnames_and_titles.txt"):
     """
@@ -152,9 +197,6 @@ def load_data(start, end, path = "fnames_and_titles.txt"):
                 print "Finished %d" %(i)
             
             words = nltk.word_tokenize(title)
-
-            if is_capitalized(words): # Ignore those that are capitalized
-                continue
                 
             title_words = make_capitalized_title(title_words = words)
             labels = [get_label(word) for word in words]
@@ -193,11 +235,11 @@ def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = No
 
                 
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()    
+    # import doctest
+    # doctest.testmod()    
     # print_filenames_and_titles() 
-    # print_trainable_data(start = 0, end = 50000)
-    # print_trainable_data(start = 50001, end = None)
+    # print_trainable_data(start = 0, end = 30000)
+    print_trainable_data(start = 30001, end = None)
     # path = "test-titles.txt", 
 
         

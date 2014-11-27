@@ -63,7 +63,7 @@ if __name__ == "__main__":
             print '-' * (sum(max_widths) + len(max_widths))
 
             def style_content(c,w): 
-                return c.rjust(w/2).ljust(w)
+                return c.ljust(w)
                 
                     
             print "Sentence:   ", ' '.join([style_content(word, width) for width, word in zip(max_widths, words)]).encode("utf8")
