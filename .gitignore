@@ -54,3 +54,11 @@ docs/_build/
 target/
 
 *~
+
+crfsuite-0.12/
+cv_scripts/
+data/
+deploy_scripts/
+tmp/
+models/
+errors/
