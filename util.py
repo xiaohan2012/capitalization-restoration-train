@@ -4,13 +4,19 @@
 Util functions
 """
 import os, re, sys, traceback
+import logging
+logging.basicConfig(format='%(asctime)s: %(message)s', datefmt = "%H:%M:%S")
+
 from glob import glob
 from codecs import open as decode_open
 
 import nltk
 import nltk.data
 
+import lxml
 from pyquery import PyQuery as pq
+
+from zipfile import ZipFile
 import json
 
 from ground_truth import (articles, prepositions, conjunctions)
@@ -44,16 +50,27 @@ def get_title_position(path):
     raise Exception("Unable to find start and end position for %s" %path)
             
 
-def get_document_content(path):
+def get_document_content_paf(path):
     """
+    Content extractor for PAF file
     Exclude the title and get the actual content of the document
 
-    >>> c = get_document_content("/group/home/puls/Shared/capitalization-recovery/30/online.wsj.com.xml.rss.3_7031/3918A8D35025B47AC6A62D293F5F506F")
+    >>> c = get_document_content_paf("/group/home/puls/Shared/capitalization-recovery/30/online.wsj.com.xml.rss.3_7031/3918A8D35025B47AC6A62D293F5F506F")
     """
     _, end = get_title_position(path + ".paf")
     with decode_open(path, "r", "utf8", "ignore") as doc:
         content = doc.read()
         return "".join(content[end:])
+
+def get_document_content(path):
+    """
+    Get the actual content of the document
+
+    >>> get_document_content("/home/group/puls/Shared/capitalization-recovery/reuters-text/sth.txt")
+    u'something'
+    """
+    with decode_open(path, "r", "utf8", "ignore") as doc:
+        return doc.read()
 
 
 # Mapping for non-standard punctuations to standard ones
@@ -126,9 +143,9 @@ def is_monocase(title_words):
     False
     >>> is_monocase("How Find Your Inner Martin Scorsese to Build Brand & Rule the World".split())
     True
-    >>> is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split())
+    >>> is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split()) # `is`
     True
-    >>> is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split())
+    >>> is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split()) # `van`
     True
     """
     for word in title_words[1:]:
@@ -173,6 +190,18 @@ def make_capitalized_title(title = None, title_words = None):
             trans_words.append(word.capitalize())
     return trans_words
 
+def make_uppercase_title(title_words):
+    """make the title uppercase
+
+    >>> make_uppercase_title(["This", "translation", "app", "helps", "professionals", "traveling", "in", "China", "and", "Japan"])
+    ['THIS', 'TRANSLATION', 'APP', 'HELPS', 'PROFESSIONALS', 'TRAVELING', 'IN', 'CHINA', 'AND', 'JAPAN']
+    """
+    words = []
+    for w in title_words:
+        words.append(w.upper())
+        
+    return words
+
 def transform_words(words, labels):
     """
     Transform words capitalization by labels
@@ -196,21 +225,37 @@ def transform_words(words, labels):
 
 def get_reuter_file_paths(dirs = []):
     """
-    Get the xml file paths under the directories `dirs`
+    Get the zip file paths under the directories `dirs`
 
     >>> paths = get_reuter_file_paths(["/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/", "/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_2/"])
     >>> paths.next()
-    '/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/3318newsML.xml'
+    '/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/19960824.zip'
     """
     for d in dirs:
-        for path in glob("%s/*.xml" %d):
+        for path in glob("%s/*.zip" %d):
             yield path 
+
+def zip_contents(zip_path):
+    """
+    Get the file contents in the zip file
+    
+    Return a generator of the file content
+
+    >>> g = zip_contents("/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/19970101.zip")
+    >>> n, c = g.next() # get the content of the next file
+    >>> n
+    '282799newsML.xml'
+    """
+    f=ZipFile(zip_path)
+    for name in f.namelist():
+        yield (name, f.read(name))
 
 def save_content(content, original_file_path, target_directory = "/group/home/puls/Shared/capitalization-recovery/reuters-text/"):
     """
     Save the content somewhere, return the saved path
 
-    >>> save_title_and_content("something", "/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/sth.xml", target_directory = "/group/home/puls/Shared/capitalization-recovery/reuters-text/")
+    >>> save_content("something", "/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/sth.xml", target_directory = "/group/home/puls/Shared/capitalization-recovery/reuters-text/")
+    '/group/home/puls/Shared/capitalization-recovery/reuters-text/sth.txt'
     >>> open("/group/home/puls/Shared/capitalization-recovery/reuters-text/sth.txt").read()
     'something'
     """
@@ -222,20 +267,25 @@ def save_content(content, original_file_path, target_directory = "/group/home/pu
         f.write(content)
     return content_path
     
-def load_reuter_article(path):
+def load_reuter_article(content):
     """
-    Given the Reuter xml file path, return:
+    Given the Reuter xml file content, return:
 
     - title
     - document content
 
-    >>> title, content = load_reuter_article("/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/3812newsML.xml")
+    >>> n, c = zip_contents('/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/19960824.zip').next()
+    >>> title, content = load_reuter_article(c)
     >>> title
-    u'Tennessee using reserves to cover $31 mln deficit.'
+    u'Harris says hikes dividend 12 pct. [CORRECTED 17:30 GMT, 26/08].'
     >>> content[:9]
-    u'Tennessee'
+    u'Electroni'
     """
-    doc = pq(open(path, "r").read())
+    try:
+        doc = pq(content)
+    except lxml.etree.ParserError:
+        raise ValueError("The xml content is invalid")
+    
     return unicode(doc.find("headline").text()), unicode(doc.find("text").text())
 
 def prepare_reuter_data(reuter_data_dirs, content_dir):
@@ -245,15 +295,34 @@ def prepare_reuter_data(reuter_data_dirs, content_dir):
     Extract the title and content in XML files and save the content somewhere,
     meanwhile print the json data arrays
     """
-    for path in get_reuter_file_paths(reuter_data_dirs):
-        t, c = load_reuter_article(path)
-        content_path = save_content(c, path, content_dir)
-        print json.dumps([content_path, unicode(t).encode("utf8")])
-        
+    zippaths = list(get_reuter_file_paths(reuter_data_dirs))[145:]
+    for i, zippath in enumerate(zippaths):
+        logging.error("%d / %d finished" %(i, len(zippaths)))
+        for path_name, xml_content in zip_contents(zippath):
+            try:
+                t, c = load_reuter_article(xml_content)
+            except ValueError:
+                logging.error("%s in %s has error" %(path_name, zippath))
+                pass
+            content_path = save_content(c, path_name, content_dir)
+            print json.dumps([content_path, unicode(t).encode("utf8")])
+
+def clean_title_file(path):
+    with decode_open(path, "r", "utf8") as f:
+        for i,l in enumerate(f):
+            if i % 10000 == 0:
+                logging.error("%.4f completed", float(i) / 806792)
+            obj = json.loads(l)
+            words = nltk.word_tokenize(obj[1])
+            if is_monocase(words):
+                print l, 
+
+
 if __name__ == "__main__":
     # path = get_file_names()[0]
-    # import doctest
-    # doctest.testmod()    
+    import doctest
+    doctest.testmod()    
 
-    prepare_reuter_data(["/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/", "/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_2/"],
-                        "/group/home/puls/Shared/capitalization-recovery/reuters-text/")
+    # prepare_reuter_data(["/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_1/", "/group/home/puls/Shared/capitalization-recovery/RCV1/REUTERS_CORPUS_2/"],
+    #                     "/group/home/puls/Shared/capitalization-recovery/reuters-text/")
+    # clean_title_file("./reuters.txt")

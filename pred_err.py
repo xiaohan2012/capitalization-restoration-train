@@ -39,13 +39,17 @@ def load_sents(filename):
                 sent = []
 
 if __name__ == "__main__":
-    from clint.textui import colored, puts
+    import sys
     import pycrfsuite
     
-    tagger = pycrfsuite.Tagger()
-    tagger.open('cap.model')
+    cap_model = sys.argv[1] # cap.model
+    content_path = sys.argv[2] # "test.txt"
+    test_data_path = sys.argv[3] # "test.crfsuite.txt"
     
-    for words, s in izip(load_sents("test.txt"), load_test_data("test.crfsuite.txt")):
+    tagger = pycrfsuite.Tagger()
+    tagger.open(cap_model)
+    
+    for words, s in izip(load_sents(content_path), load_test_data(test_data_path)):
         correct_labels = [l for _, l in s]
 
         features = [f for f,_ in s]
@@ -69,10 +73,4 @@ if __name__ == "__main__":
             print "Sentence:   ", ' '.join([style_content(word, width) for width, word in zip(max_widths, words)]).encode("utf8")
             print "Correct:    ", ' '.join([style_content(cl, width) for width, cl in zip(max_widths, correct_labels)]).encode("utf8")
             print "Predicted:  ", ' '.join([style_content(pl, width) for width, pl in zip(max_widths, predicted_labels)]).encode("utf8")
-            
-            
-            
-            
-        
-                
-
+                                                                      

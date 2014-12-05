@@ -9,7 +9,9 @@ from guess_language import guessLanguage
 
 from util import (get_file_names, 
                   extract_title, 
-                  make_capitalized_title, 
+                  make_capitalized_title,
+                  make_uppercase_title, 
+                  get_document_content_paf,
                   get_document_content, 
                   is_monocase, 
                   normalize_title)
@@ -38,7 +40,7 @@ def get_alpha_label(word, **kwargs):
 
 def appear_capitalized_indoc_label(word, doc):
     """
-    >>> doc = get_document_content("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1")
+    >>> doc = get_document_content_paf("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1")
     >>> appear_capitalized_indoc_label(u"Shell", doc)
     'IN_DOC_CAP'
     >>> appear_capitalized_indoc_label(u"Van Beurden", doc)
@@ -47,13 +49,16 @@ def appear_capitalized_indoc_label(word, doc):
     'OTHER'
     >>> appear_capitalized_indoc_label(u"'Getty", doc) #some trick
     'OTHER'
-    >>> doc = get_document_content("/group/home/puls/Shared/capitalization-recovery/12/www.sacbee.com.business.index/A33DCBDA991E786734BCA02B01B9DB04")
+    >>> doc = get_document_content_paf("/group/home/puls/Shared/capitalization-recovery/12/www.sacbee.com.business.index/A33DCBDA991E786734BCA02B01B9DB04")
     >>> appear_capitalized_indoc_label(u'Shinjiro', doc)
     'OTHER'
     >>> appear_capitalized_indoc_label(u'Valley', doc)
     'OTHER'
     >>> appear_capitalized_indoc_label(u'Robertson', doc)
     'IN_DOC_CAP'
+    >>> doc = get_document_content("data/empty.txt")
+    >>> appear_capitalized_indoc_label(u'stuff', doc)
+    'OTHER'
     """
     if not word[0].isalpha(): #stuff like 'robust'
         return "OTHER"
@@ -133,7 +138,7 @@ def get_label(word, **kwargs):
         return "I"
         # raise ValueError("Invalid value `%s`" %(word))
 
-def convert_to_trainable_format(raw_title, doc = None):
+def convert_to_trainable_format(raw_title, title_transform_func, doc = None):
     """
     Given some title(before capitalization), return the trainable format
     
@@ -151,10 +156,11 @@ def convert_to_trainable_format(raw_title, doc = None):
     - Capitalized in dictionary or not
     - Is all upper-case after removing the non-alphabetic symbols
     - Appear in document as capitalized or not(optional)
+    - POS tags
     - the class label, "C" as "should be capitalized" and "L" should be "lowered"
     """
     words = nltk.word_tokenize(raw_title)    
-    title_words = make_capitalized_title(title_words = words)
+    title_words = title_transform_func(title_words = words)
     
     feature_extractors = [get_alpha_label,
                           get_lower_in_dict_label,
@@ -165,7 +171,7 @@ def convert_to_trainable_format(raw_title, doc = None):
     pos_tags = [tag 
                 for _, tag in nltk.pos_tag(words)] # pos tags
 
-    if doc:
+    if doc is not None:
         feature_extractors.append(appear_capitalized_indoc_label)
         
     head_title_word , head_word = title_words[0], words[0]
@@ -174,46 +180,14 @@ def convert_to_trainable_format(raw_title, doc = None):
         [(title_word, "OTHER") + tuple([fe(word, doc = doc) for fe in feature_extractors]) + (pos_tags[i], get_label(word), )
          for i, title_word, word in zip(xrange(1, len(title_words)), title_words[1:], words[1:])]
 
-def load_data(start, end, path = "fnames_and_titles.txt"):
-    """
-    Return data in format like:
-    [
-    [(word1, tag1), (word2, tag2), ...], #sentence 1
-    [(word1, tag1), (word2, tag2), ...], #sentence 2
-    ]
-    """
-    print "loading data indexed from %d to %r" %(start, end)
-    i = 0
-    data = []
-    with open(path, "r", "utf8") as f:
-        for line in f:
-            if i < start:
-                i += 1
-                continue
-
-            _, title = json.loads(line)
-
-            if i % 1000 == 0:
-                print "Finished %d" %(i)
-            
-            words = nltk.word_tokenize(title)
-                
-            title_words = make_capitalized_title(title_words = words)
-            labels = [get_label(word) for word in words]
-            data.append(zip(title_words, labels))
-
-            i += 1
-            if end is not None and i > end:
-                sys.stderr.write("Reached %d.\nTerminate.\n" %(end))
-                break
-                
-    return data
-
-def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = None):
+def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = None,
+                         content_extractor = get_document_content_paf,
+                         title_transform_func = make_capitalized_title):
     i = 0
     with open(path, "r", "utf8") as f:
         for line in f:
             fname, title = json.loads(line)
+            fname = "/cs/puls/tmp/Capitalization/reuters-text/" + fname
             if i < start:
                 i += 1
                 continue
@@ -221,7 +195,9 @@ def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = No
             if i % 1000 == 0:
                 sys.stderr.write("Finished %d\n" %i)
 
-            row = convert_to_trainable_format(title, get_document_content(fname))
+            row = convert_to_trainable_format(title,
+                                              title_transform_func,
+                                              content_extractor(fname))
             
             for stuff in row:
                 print unicode(' '.join(stuff)).encode('utf8')
@@ -235,11 +211,13 @@ def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = No
 
                 
 if __name__ == "__main__":
+    import sys
     # import doctest
     # doctest.testmod()    
     # print_filenames_and_titles() 
     # print_trainable_data(start = 0, end = 30000)
-    print_trainable_data(start = 30001, end = None)
-    # path = "test-titles.txt", 
-
-        
+    print_trainable_data(path = sys.argv[1],
+                         start = 0, end = None,
+                         content_extractor = get_document_content,
+                         title_transform_func = make_uppercase_title)
+    # path = "test-titles.txt",       
