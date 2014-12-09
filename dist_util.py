@@ -1,6 +1,9 @@
-import os, sys
+import os, sys, logging
 from alnsim.best_ukko_servers import best_n
 from glob import glob
+
+logging.basicConfig(format='%(levelname)s-%(asctime)s: %(message)s',
+                    level = logging.INFO)
 
 def gen_preprocessing_script(servers, data_file_path,
                              target_file_path = "data/reuters/trainable"):
@@ -62,14 +65,18 @@ def gen_cv_scripts(task_name, servers, group, feature_groups, data_dir, tmp_dir)
                 f.write("cat {test_path_string} | python crfsuite-0.12/example/chunking.py {feature_ids} > {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt\n".format(**locals()))
 
                 f.write("./crfsuite-0.12/bin/crfsuite learn -m {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model {tmp_dir}/{group}/{feature_group_dir}/train-{test_data_id}.crfsuite.txt\n".format(**locals()))
+                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/train-{test_data_id}.txt\n".format(**locals())) # remove train data to save space
+                
                 f.write("./crfsuite-0.12/bin/crfsuite tag -qt -m {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt > {tmp_dir}/{group}/{feature_group_dir}/result-{test_data_id}.txt\n".format(**locals()))
                 # clean it up
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/train*.txt\n".format(**locals()))
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test*.txt\n".format(**locals()))
+
+                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.txt\n".format(**locals())) # remove test data
+                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model\n".format(**locals())) # remove model 
                 f.write("\"\n")
 
 
 if __name__ == "__main__":
+    
     from datetime import datetime
     
     exclude_table = {0: (1, 48),
@@ -94,10 +101,23 @@ if __name__ == "__main__":
     #                "/cs/taatto/home/hxiao/capitalization-recovery/data/uppercase/trainable/*",
     #                "/cs/taatto/home/hxiao/capitalization-recovery/tmp")
     
-    feature_groups = ("1", "2", "3", "1 2", "1 3", "2 3")
-    gen_cv_scripts("fgcv", servers, "monocase",
-                   feature_groups[:1],
-                   "/cs/taatto/home/hxiao/capitalization-recovery/data/monocase/trainable/*",
+    # feature_groups = ("1", "2", "3", "1 2", "1 3", "2 3")
+    
+    task_name = sys.argv[1]
+
+    data_group = sys.argv[2]
+    assert data_group in ("uppercase", "monocase")
+    
+    assert len(sys.argv[2:]) >= 1, "Select at least some feature group"
+    feature_group = " ".join(sys.argv[3:])
+    
+    logging.info("Task Name: %s", task_name)
+    logging.info("Data Group: %s", data_group)
+    logging.info("Feature group: %s", feature_group)
+    
+    gen_cv_scripts(task_name, servers, data_group,
+                   [feature_group],
+                   "/cs/taatto/home/hxiao/capitalization-recovery/data/{data_group}/trainable/*".format(**locals()),
                    "/cs/taatto/home/hxiao/capitalization-recovery/tmp")
     
     print "\n".join(servers)                
