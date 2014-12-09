@@ -65,12 +65,12 @@ def gen_cv_scripts(task_name, servers, group, feature_groups, data_dir, tmp_dir)
                 f.write("cat {test_path_string} | python crfsuite-0.12/example/chunking.py {feature_ids} > {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt\n".format(**locals()))
 
                 f.write("./crfsuite-0.12/bin/crfsuite learn -m {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model {tmp_dir}/{group}/{feature_group_dir}/train-{test_data_id}.crfsuite.txt\n".format(**locals()))
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/train-{test_data_id}.txt\n".format(**locals())) # remove train data to save space
+                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/train-{test_data_id}.crfsuite.txt\n".format(**locals())) # remove train data to save space
                 
                 f.write("./crfsuite-0.12/bin/crfsuite tag -qt -m {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt > {tmp_dir}/{group}/{feature_group_dir}/result-{test_data_id}.txt\n".format(**locals()))
                 # clean it up
 
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.txt\n".format(**locals())) # remove test data
+                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt\n".format(**locals())) # remove test data
                 f.write("rm {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model\n".format(**locals())) # remove model 
                 f.write("\"\n")
 
