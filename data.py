@@ -2,7 +2,6 @@
 
 import sys, re, json, string
 
-import enchant
 import nltk
 from codecs import open
 from guess_language import guessLanguage
@@ -10,11 +9,17 @@ from guess_language import guessLanguage
 from util import (get_file_names, 
                   extract_title, 
                   make_capitalized_title,
+                  make_lowercase_title,
                   make_uppercase_title, 
                   get_document_content_paf,
                   get_document_content, 
                   is_monocase, 
                   normalize_title)
+
+from word_shape_util import (without_alpha, 
+                             contains_lowercase, 
+                             contains_uppercase)
+from feature import *
 
 from ground_truth import (articles, prepositions, conjunctions)
 
@@ -34,102 +39,71 @@ def print_filenames_and_titles():
         if not is_monocase(nltk.word_tokenize(title)) and guessLanguage(title) == "en": #is not monocase and is English
             print json.dumps([fname, unicode(title).encode("utf8")])
     
-
-def get_alpha_label(word, **kwargs):
-    return "BEGINS_WITH_ALPHA" if word[0].isalpha() else "OTHER"    
-
-def appear_capitalized_indoc_label(word, doc):
-    """
-    >>> doc = get_document_content_paf("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1")
-    >>> appear_capitalized_indoc_label(u"Shell", doc)
-    'IN_DOC_CAP'
-    >>> appear_capitalized_indoc_label(u"Van Beurden", doc)
-    'OTHER'
-    >>> appear_capitalized_indoc_label(u"Getty", doc)
-    'OTHER'
-    >>> appear_capitalized_indoc_label(u"'Getty", doc) #some trick
-    'OTHER'
-    >>> doc = get_document_content_paf("/group/home/puls/Shared/capitalization-recovery/12/www.sacbee.com.business.index/A33DCBDA991E786734BCA02B01B9DB04")
-    >>> appear_capitalized_indoc_label(u'Shinjiro', doc)
-    'OTHER'
-    >>> appear_capitalized_indoc_label(u'Valley', doc)
-    'OTHER'
-    >>> appear_capitalized_indoc_label(u'Robertson', doc)
-    'IN_DOC_CAP'
-    >>> doc = get_document_content("data/empty.txt")
-    >>> appear_capitalized_indoc_label(u'stuff', doc)
-    'OTHER'
-    """
-    if not word[0].isalpha(): #stuff like 'robust'
-        return "OTHER"
-        
-    word_upper = unicode(word[0].upper() + word[1:])
-    regexp = re.compile(ur"[0-9a-zA-Z)] %s[ \t\n.,']" %re.escape(word_upper), re.U)
-    
-    return "IN_DOC_CAP" if regexp.search(doc) else "OTHER"
-
-d = enchant.Dict("en_US")
-def get_lower_in_dict_label(word, **kwargs):
-    if d.check(word.lower()):
-        return "LOWER_IN_DICT"
-    else:
-        return "OTHER"
-
-def get_upper_in_dict_label(word, **kwargs):
-    if d.check(word.upper()):
-        return "UPPER_IN_DICT"
-    else:
-        return "OTHER"
-
-def get_cap_in_dict_label(word, **kwargs):
-    if d.check(word.capitalize()):
-        return "CAP_IN_DICT"
-    else:
-        return "OTHER"
-
-
-exclude = unicode(string.punctuation + ''.join([str(i) for i in xrange(10)]))
-table = {ord(c): None
-         for c in exclude}
-
-def get_allupper_label(word, **kwargs):
-    """
-    If the letters in word is all uppercased
-    
-    >>> get_allupper_label(u'U.S.')
-    'ALL_UPPER'
-    >>> get_allupper_label(u'Ad')
-    'OTHER'
-    >>> get_allupper_label(u'123..4')
-    'OTHER'
-    >>> get_allupper_label(u'HAO123')
-    'ALL_UPPER'
-    >>> # get_allupper_label(u'FIIs')    
-    """
-    word = word.translate(table) # Remove punctuations + numbers
-    if word and word.upper() == word:
-        return "ALL_UPPER"
-    else:
-        return "OTHER"
-    
 def get_label(word, **kwargs):
     """
-    >>> get_label(u'GCC')
-    'I'
-    >>> get_label(u'Kinder')
-    'C'
-    >>> get_label(u'213')
-    'I'
+    Possible labels
+    
+    IC: initial capital, note, there should be at least one alphabetic letter, and the alphabetic ones are in lower case 
+    AU: all uppercase
+    AL: all lowercase
+    MX: mixed case
+    AN: all no case
+
+    >>> get_label(u'Click')
+    'IC'
+    >>> get_label(u'F11')
+    'AU'
+    >>> get_label(u'OK')
+    'AU'
+    >>> get_label(u'/hone/Doc')
+    'MX'
+    >>> get_label(u'HealthCare')
+    'MX'
+    >>> get_label(u'ealthCare')
+    'MX'
     >>> get_label(u'lower')
-    'L'
-    >>> get_label(u'U.S.')
-    'I'
-    >>> get_label(u'\\'s')
-    'I'
-    >>> # get_label(u'in-Flight')
+    'AL'
+    >>> get_label(u'$123')
+    'AN'
+    >>> get_label(u'.')
+    'AN'
+    >>> get_label(u'Fb11')
+    'IC'
+    >>> get_label(u'11.5a')
+    'AL'
+    >>> get_label(u'11.5A')
+    'AU'
+    >>> get_label(u'11.5Aa')
+    'MX'
     """
+    if without_alpha(word):
+        return "AN"
+    else:
+        if word[0].isalpha(): # starts with alpha
+            # a word
+            if word.lower() == word:
+                return "AL"
+            elif word[0].upper() == word[0] and contains_lowercase(word) and word[1:].lower() == word[1:]:
+                return "IC"
+            elif word.upper() == word:
+                return "AU"
+            else:
+                return "MX"
+        else:
+            lower_flag = contains_lowercase(word)
+            upper_flag = contains_uppercase(word)
+            if lower_flag and upper_flag:
+                return "MX"
+            elif lower_flag and not upper_flag:
+                return "AL"
+            else:
+                return "AU"
+                
+            
+                
+
     if word.upper() == word:
-        return "I"
+        return "AU"
     elif word[0].isalpha() and word[0] == word[0].upper():
         return "C" 
     elif word[0].isalpha():
@@ -140,12 +114,13 @@ def get_label(word, **kwargs):
 
 def convert_to_trainable_format(raw_title, title_transform_func, doc = None):
     """
-    Given some title(before capitalization), return the trainable format
+    Given some title(before capitalization), return the trainable(for CRF-suite) format
     
-    >>> c = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10")
-    >>> c = convert_to_trainable_format(u"FTSE 100 watch: Footsie hits fresh lows on global growth concerns")    
+    >>> from util import make_capitalized_title
+    >>> c = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10", make_capitalized_title)
+    >>> c = convert_to_trainable_format(u"FTSE 100 watch: Footsie hits fresh lows on global growth concerns", make_capitalized_title)    
     >>> doc = open("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1", "r", "utf8").read()
-    >>> c = convert_to_trainable_format(u"Why oil prices will be 'robust' long-term: Shell CEO", doc)    
+    >>> c = convert_to_trainable_format(u"Why oil prices will be 'robust' long-term: Shell CEO", make_capitalized_title, doc)    
     
     Where    
     - the title word after being treated as title
@@ -175,10 +150,12 @@ def convert_to_trainable_format(raw_title, title_transform_func, doc = None):
         feature_extractors.append(appear_capitalized_indoc_label)
         
     head_title_word , head_word = title_words[0], words[0]
-    
-    return [(head_title_word, "HEAD") + tuple([fe(head_word, doc = doc) for fe in feature_extractors]) + (pos_tags[0], get_label(head_word), )] + \
-        [(title_word, "OTHER") + tuple([fe(word, doc = doc) for fe in feature_extractors]) + (pos_tags[i], get_label(word), )
-         for i, title_word, word in zip(xrange(1, len(title_words)), title_words[1:], words[1:])]
+
+    features = [(head_title_word, "HEAD") + tuple([fe(head_word, doc = doc) for fe in feature_extractors]) + (pos_tags[0], get_label(head_word), )]
+    features += [(title_word, "OTHER") + tuple([fe(word, doc = doc) for fe in feature_extractors]) + (pos_tags[i], get_label(word), )
+                 for i, title_word, word in zip(xrange(1, len(title_words)), title_words[1:], words[1:])]
+
+    return features
 
 def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = None,
                          content_extractor = get_document_content_paf,
@@ -187,18 +164,20 @@ def print_trainable_data(path = "fnames_and_titles.txt", start = 50000, end = No
     with open(path, "r", "utf8") as f:
         for line in f:
             fname, title = json.loads(line)
-            fname = "/cs/puls/tmp/Capitalization/reuters-text/" + fname
             if i < start:
                 i += 1
                 continue
             
             if i % 1000 == 0:
                 sys.stderr.write("Finished %d\n" %i)
-
+            
             row = convert_to_trainable_format(title,
                                               title_transform_func,
-                                              content_extractor(fname))
-            
+                                              (content_extractor(fname) 
+                                               if content_extractor and callable(content_extractor) 
+                                               else None)
+                                          )
+
             for stuff in row:
                 print unicode(' '.join(stuff)).encode('utf8')
             print 
@@ -216,8 +195,25 @@ if __name__ == "__main__":
     # doctest.testmod()    
     # print_filenames_and_titles() 
     # print_trainable_data(start = 0, end = 30000)
+    path = sys.argv[1]
+    op = sys.argv[2]
+    start = int(sys.argv[3])
+    
+    try:
+        end = int(sys.argv[4])
+    except IndexError:
+        end = None
+    
+    op_table = {
+        "upper": make_uppercase_title,
+        "lower": make_lowercase_title,
+        "cap": make_capitalized_title
+    }
+    assert op in op_table.keys()
+    
+    make_lowercase_title
     print_trainable_data(path = sys.argv[1],
-                         start = 0, end = None,
+                         start = start, end = end,
                          content_extractor = get_document_content,
-                         title_transform_func = make_uppercase_title)
+                         title_transform_func = op_table[op])
     # path = "test-titles.txt",       

@@ -202,6 +202,18 @@ def make_uppercase_title(title_words):
         
     return words
 
+def make_lowercase_title(title_words):
+    """make the title lowercase
+
+    >>> make_lowercase_title(["This", "translation", "app", "helps", "professionals", "traveling", "in", "China", "and", "Japan"])
+    ['this', 'translation', 'app', 'helps', 'professionals', 'traveling', 'in', 'china', 'and', 'japan']
+    """
+    words = []
+    for w in title_words:
+        words.append(w.lower())
+        
+    return words
+
 def transform_words(words, labels):
     """
     Transform words capitalization by labels
