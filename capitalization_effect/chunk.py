@@ -78,20 +78,27 @@ def main(convert_func = None):
 
     if convert_func:
         # transform the sentence
+        print "convert leaf nodes"
         test_sents = [convert_leaf_node(sent, convert_func) 
                       for sent in test_sents]
-
-    unigram_chunker = UnigramChunker(train_sents)
-
-    print(unigram_chunker.evaluate(test_sents))
+    print "train..."
+    chunker = ConsecutiveNPChunker(train_sents)
+    print "evaluate..."
+    print(chunker.evaluate(test_sents))
 
 if __name__ == "__main__":
-    # main()
-    # convert_func = lambda (s,t): (s.lower(), t)
-    train_sents = conll2000.chunked_sents('train.txt', chunk_types=['NP'])
-    test_sents = conll2000.chunked_sents('test.txt', chunk_types=['NP'])
-    chunker = ConsecutiveNPChunker(train_sents)
-    print(chunker.evaluate(test_sents))
+    import sys
+    try:
+        oper = sys.argv[1]
+        if oper == "upper":
+            main(lambda (s,t): (s.upper(), t))
+        elif oper == "lower":
+            main(lambda (s,t): (s.lower(), t))
+        else:
+            print "invalid oper"
+    except IndexError:
+        main()
+    
 
 
 

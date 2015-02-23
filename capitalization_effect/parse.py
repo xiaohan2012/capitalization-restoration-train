@@ -5,21 +5,29 @@ from nltk.tree import Tree
 
 import pdb
 
-def main():
+nltk.internals.config_java("/cs/fs/home/hxiao/software/jre1.8.0_31/bin/java")
+nltk.internals.config_java(options='-Xmx4096M')
+
+def main(transform_func = None):
     parser=StanfordParser(
         path_to_jar = "/cs/fs/home/hxiao/code/stanford-parser-full-2015-01-30/stanford-parser.jar",
         path_to_models_jar = "/cs/fs/home/hxiao/code/stanford-parser-full-2015-01-30/stanford-parser-3.5.1-models.jar",
         model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
     )
 
-    n = 100
-    test_sents = treebank.sents()[:n]
-    test_sents = [[w.lower() for w in s] for s in test_sents]# lower it
+    test_sents = treebank.sents()[-5000:]
+
+    print "len(test_sents) = %d" %(len(test_sents))
+
+    if transform_func and callable(transform_func):
+        print "transforming it using ", transform_func
+        test_sents = [[transform_func(w) for w in s] 
+                      for s in test_sents]# transform it
 
     print "predicting"
     pred_parses = parser.parse_sents(test_sents)
     
-    gold_parses = treebank.parsed_sents()[:n]
+    gold_parses = treebank.parsed_sents()
     
     print "evaluating"
     print precision_and_recall(
@@ -73,6 +81,17 @@ def precision_and_recall(gold_nodes_list, pred_nodes_list):
 
     return float(correct_n) / pred_n, float(correct_n) / gold_n
 
-
 if __name__ == "__main__":
-    main()
+    import sys
+    try:
+        oper = sys.argv[1]
+        if oper == "upper":
+            main(lambda s: s.upper())
+        elif oper == "lower":
+            main(lambda s: s.lower())
+        elif oper == "cap":
+            main(lambda s: s.title())
+        else:
+            print "invalid oper"
+    except IndexError:
+        main()
