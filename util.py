@@ -19,7 +19,7 @@ from pyquery import PyQuery as pq
 from zipfile import ZipFile
 import json
 
-from ground_truth import (articles, prepositions, conjunctions)
+from ground_truth import (ARTICLES, PREPOSITIONS, CONJUNCTIONS)
 
 def get_file_names(paths = ["/group/home/puls/Shared/capitalization-recovery/12"]):
     """
@@ -150,9 +150,9 @@ def is_monocase(title_words):
     """
     for word in title_words[1:]:
         prefix = word.split("-")[0] #handle the in-Flight case
-        should_be_lower = lambda w: (w in articles or
-                                     w in prepositions or
-                                     w in conjunctions)
+        should_be_lower = lambda w: (w in ARTICLES or
+                                     w in PREPOSITIONS or
+                                     w in CONJUNCTIONS)
 
         if should_be_lower(word) or should_be_lower(prefix):
             continue
@@ -161,59 +161,6 @@ def is_monocase(title_words):
 
     return True
     
-def make_capitalized_title(title = None, title_words = None):
-    """
-    >>> make_capitalized_title(title = "This translation app helps professionals traveling in China and Japan")
-    ['This', 'Translation', 'App', 'Helps', 'Professionals', 'Traveling', 'in', 'China', 'and', 'Japan']
-    >>> make_capitalized_title(title = "Russia to see surge of investments if sanctions lifted: VTB Bank Head")
-    ['Russia', 'to', 'See', 'Surge', 'of', 'Investments', 'if', 'Sanctions', 'Lifted', ':', 'VTB', 'Bank', 'Head']
-    >>> make_capitalized_title(title = "CIS FMs hold summit in Belarus")
-    ['CIS', 'FMs', 'Hold', 'Summit', 'in', 'Belarus']
-    """
-    
-    trans_words = []
-    if title_words:
-        words = title_words
-    elif title:
-        words = nltk.word_tokenize(title)
-    else:
-        raise ValueError("Receive nothing..")
-
-    for i, word in enumerate(words):
-        if i == 0:
-            trans_words.append(word if word[0] == word[0].upper() else word.capitalize())
-        elif (word in articles or word in prepositions or word in conjunctions):
-            trans_words.append(word)
-        elif word[0] == word[0].upper(): #already capitalized
-            trans_words.append(word)
-        else:
-            trans_words.append(word.capitalize())
-    return trans_words
-
-def make_uppercase_title(title_words):
-    """make the title uppercase
-
-    >>> make_uppercase_title(["This", "translation", "app", "helps", "professionals", "traveling", "in", "China", "and", "Japan"])
-    ['THIS', 'TRANSLATION', 'APP', 'HELPS', 'PROFESSIONALS', 'TRAVELING', 'IN', 'CHINA', 'AND', 'JAPAN']
-    """
-    words = []
-    for w in title_words:
-        words.append(w.upper())
-        
-    return words
-
-def make_lowercase_title(title_words):
-    """make the title lowercase
-
-    >>> make_lowercase_title(["This", "translation", "app", "helps", "professionals", "traveling", "in", "China", "and", "Japan"])
-    ['this', 'translation', 'app', 'helps', 'professionals', 'traveling', 'in', 'china', 'and', 'japan']
-    """
-    words = []
-    for w in title_words:
-        words.append(w.lower())
-        
-    return words
-
 def transform_words(words, labels):
     """
     Transform words capitalization by labels
