@@ -5,7 +5,6 @@ import sys, re, json, string
 import nltk
 from codecs import open
 from guess_language import guessLanguage
-from operator import itemgetter
 
 from util import (get_file_names, 
                   extract_title, 
@@ -100,9 +99,6 @@ def get_label(word, **kwargs):
             else:
                 return "AU"
                 
-            
-                
-
     if word.upper() == word:
         return "AU"
     elif word[0].isalpha() and word[0] == word[0].upper():
@@ -120,32 +116,23 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
     >>> from cap_transform import make_capitalized_title
     >>> from feature_extractor import FeatureExtractor
     >>> extractor = FeatureExtractor()
-    >>> c = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10", make_capitalized_title, extractor)
-    >>> c = convert_to_trainable_format(u"FTSE 100 watch: Footsie hits fresh lows on global growth concerns", make_capitalized_title, extractor)
-    >>> # doc = open("/group/home/puls/Shared/capitalization-recovery/10/www.cnbc.com.id.10000030.device.rss.rss/90792FEF7ACEE693A7A87BF5F3D341A1", "r", "utf8").read()
-    >>> # c = convert_to_trainable_format(u"Why oil prices will be 'robust' long-term: Shell CEO", make_capitalized_title, doc)    
-    
-    Where    
-    - the title word after being treated as title
-    - At the title begining or not
-    - the begining character is number or not
-    - Lower case in dictionary or not
-    - Upper case in dictionary or not
-    - Capitalized in dictionary or not
-    - Is all upper-case after removing the non-alphabetic symbols
-    - Appear in document as capitalized or not(optional)
-    - POS tags
-    - the class label, "C" as "should be capitalized" and "L" should be "lowered"
+    >>> sent = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10", make_capitalized_title, extractor)
+    >>> sent[2]["word"]
+    u'Hold'
+    >>> sent[5]["lower-in-dict"]
+    False
+    >>> sent[1]["y"]
+    'MX'
     """
     words = nltk.word_tokenize(raw_title)
 
     transformed_words = title_transform_func(title_words = words)
         
-    words_with_features = feature_extractor.extract(words)
+    words_with_features = feature_extractor.extract(transformed_words)
 
     #add the labels
-    for transformed_word, word in zip(transformed_words, words_with_features):
-        word["y"] = get_label(transformed_word)
+    for word_str, word_info in zip(words, words_with_features):
+        word_info["y"] = get_label(word_str)
 
     return words_with_features
 
@@ -156,11 +143,13 @@ def print_trainable_data(path,
                          content_extractor = None):
     """
     >>> extractor = FeatureExtractor()
-    >>> print_trainable_data(path = "fnames_and_titles.txt", extractor = extractor, feature_names = extractor.feature_names, start = 0, end = 1, title_transform_func = make_capitalized_title) #doctest: +ELLIPSIS
-    The True True True True False DT True IC
-    Sun False True True True False NNP True IC
+    >>> print_trainable_data(path = "data/title_test.txt", extractor = extractor, feature_names = extractor.feature_names, start = 0, end = 1, title_transform_func = make_capitalized_title) #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    One True True True True True False True False CD IC
     ...
-    
+    PaaS False False False False False False True False NNP MX
+    ...
+    IBM False False True False True True True False NNP AU
+    ...
     """
     feature_names += ['y'] #add the label feature name
     i = 0
@@ -207,27 +196,6 @@ def load_labeled_data(path):
             _, title = json.loads(line)
             words = nltk.word_tokenize(title)
             yield [(w, get_label(w)) for w in words]
-
-def transform_data(data, sent_transform_func):
-    """
-    Transform the data on the sentence level
-    
-    >>> from cap_transform import (make_capitalized_title, make_lowercase_title)
-    >>> input = [[(u'The', 'IC'), (u'Sun', 'IC'), (u'Life', 'IC'), (u'Building', 'IC'), (u'receives', 'AL'), (u'LEED', 'AU'), (u'Silver', 'IC'), (u'Certification', 'IC')]]
-    >>> transform_data(input, make_capitalized_title)
-    [[(u'The', 'IC'), (u'Sun', 'IC'), (u'Life', 'IC'), (u'Building', 'IC'), (u'Receives', 'AL'), (u'LEED', 'AU'), (u'Silver', 'IC'), (u'Certification', 'IC')]]
-    >>> transform_data(input, make_lowercase_title)
-    [[(u'the', 'IC'), (u'sun', 'IC'), (u'life', 'IC'), (u'building', 'IC'), (u'receives', 'AL'), (u'leed', 'AU'), (u'silver', 'IC'), (u'certification', 'IC')]]
-    """
-    assert callable(sent_transform_func)
-
-    new_data = []
-    for instance in data:
-        new_data.append(
-            zip(sent_transform_func(title_words = map(itemgetter(0), instance)), 
-                map(itemgetter(1), instance))
-        )
-    return new_data
 
 if __name__ == "__main__":
     import sys

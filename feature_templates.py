@@ -1,40 +1,41 @@
 import sys
 # Attribute templates.
 
-lexical_features = [    
-    (('w', -1), ),
-    (('w',  0), ),
-    (('w',  1), ),
-    (('w', -1), ('w',  0)),
-    (('w',  0), ('w',  1)),
+lexical_features = [ 
+    (('word',  1), ),
+    (('word',  -1), ),
+    (('word',  0), ),
+    (('word', -1), ('word',  0)),
+    (('word',  0), ('word',  1)),
 ]
 
 positional_features = [
-    (('head', 0), ),
+    (('is-leading-word', 0), ),
 ]
 
 dict_features = [
-    (('ldict', 0), ),
-    (('udict', 0), ),
-    (('capdict', 0), ),
-    (('allupper', 0), )
+    (('lower-in-dict', 0), ),
+    (('upper-in-dict', 0), ),
+    (('cap-in-dict', 0), ),
+    (('orig-in-dict', 0), ),
 ]
 
 pos_features = [
-    (('pos', -1), ),
-    (('pos',  0), ),
-    (('pos',  1), ),
-    (('pos', -1), ('pos',  0)),
-    (('pos',  0), ('pos',  1)),
+    (('pos-tag',  1), ),
+    (('pos-tag',  -1), ),
+    (('pos-tag',  0), ),
+    (('pos-tag', -1), ('pos-tag',  0)),
+    (('pos-tag',  0), ('pos-tag',  1)),
 ]
 
 spelling_features = [
-    (('alpha', 0), ),
+    (('all-letter-uppercase', 0), ),
+    (('begins-with-alphabetic', 0), ),
+    (('has-punct', 0), )
 ]
 
 document_features = [(('indoccap', 0), )]
 
-# Some mapping
 id2featue = {
     1: lexical_features,
     2: positional_features,
@@ -42,15 +43,6 @@ id2featue = {
     4: pos_features,
     5: spelling_features,
     6: document_features
-}
-
-id2field = {
-    1: "w",
-    2: "head",
-    3: "ldict udict capdict allupper",
-    4: "pos",
-    5: "alpha",
-    6: "indoccap"
 }
 
 def load_feature_templates(feature_ids = [1,2,3,4,5]):

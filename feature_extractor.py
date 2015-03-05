@@ -211,7 +211,7 @@ class FeatureExtractor(object):
     """
     Extract features for sentence
 
-    >>> extractor = FeatureExtractor(transform_value = True)
+    >>> extractor = FeatureExtractor()
     >>> info = extractor.extract([u"I", u"love", u"you"])
     >>> len(info[0]) == len(DEFAULT_FEATURES)
     True
@@ -222,16 +222,12 @@ class FeatureExtractor(object):
     >>> extractor.feature_names
     ['word', 'is-leading-word', 'lower-in-dict', 'upper-in-dict', 'cap-in-dict', 'orig-in-dict', 'all-letter-uppercase', 'begins-with-alphabetic', 'has-punct', 'pos-tag']
     """
-    def __init__(self, features = DEFAULT_FEATURES, 
-                 value_label_mapping = VALUE_LABEL_MAPPING, 
-                 transform_value = False):
+    def __init__(self, features = DEFAULT_FEATURES):
         self.features = features
-        self.transform_value = transform_value
 
     def extract(self, sent):
         """Expect unicode strings"""
-        if isinstance(sent, basestring): #if not tokenized
-            sent = nltk.word_tokenize(sent)
+        assert isinstance(sent, list), "sent must be a list"
 
         kwargs = {}
         if POSFeature in self.features:

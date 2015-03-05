@@ -49,7 +49,6 @@ def get_title_position(path):
 
     raise Exception("Unable to find start and end position for %s" %path)
             
-
 def get_document_content_paf(path):
     """
     Content extractor for PAF file
@@ -131,56 +130,7 @@ def extract_title(path):
     with decode_open(path, "r", "utf8") as doc:
         #extract the content
         content = doc.read()
-        return "".join(content[start: end])
-
-def is_monocase(title_words):
-    """
-    Determine if the title words are already capitalized
-
-    >>> is_monocase("Global Eagle Entertainment and SES Sign a Strategic Partnership to Deliver Global Ku-Band Satellite in-Flight Connectivity to Airlines".split())
-    True
-    >>> is_monocase("Agenda Released for the 17th annual Summit on Superbugs & Superdrugs".split())
-    False
-    >>> is_monocase("How Find Your Inner Martin Scorsese to Build Brand & Rule the World".split())
-    True
-    >>> is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split()) # `is`
-    True
-    >>> is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split()) # `van`
-    True
-    """
-    for word in title_words[1:]:
-        prefix = word.split("-")[0] #handle the in-Flight case
-        should_be_lower = lambda w: (w in ARTICLES or
-                                     w in PREPOSITIONS or
-                                     w in CONJUNCTIONS)
-
-        if should_be_lower(word) or should_be_lower(prefix):
-            continue
-        elif word[0].isalpha() and word[0].lower() == word[0]: # there is some lower cased words besides articles prepositions and conjunctions
-            return False
-
-    return True
-    
-def transform_words(words, labels):
-    """
-    Transform words capitalization by labels
-
-    >>> words = ['Google', '\\'s', 'Translation', 'App', 'Helps', 'Professionals', 'Traveling', 'in', 'China', 'and', 'Japan']
-    >>> transform_words(words, ["C", "I", "L", "L", "L", "L", "L", "L", "C", "L", "C"])
-    ['Google', "'s", 'translation', 'app', 'helps', 'professionals', 'traveling', 'in', 'China', 'and', 'Japan']
-    """
-    assert len(words) == len(labels)
-
-    new_words = []
-    for w, l in zip(words, labels):
-        if l == "C":
-            new_words.append(w[0].upper() + w[1:])
-        elif l == "L":
-            new_words.append(w[0].lower() + w[1:])
-        elif l == "I":
-            new_words.append(w)
-
-    return new_words
+        return "".join(content[start: end])    
 
 def get_reuter_file_paths(dirs = []):
     """
