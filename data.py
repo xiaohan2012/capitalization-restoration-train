@@ -109,7 +109,7 @@ def get_label(word, **kwargs):
         return "I"
         # raise ValueError("Invalid value `%s`" %(word))
 
-def convert_to_trainable_format(raw_title, title_transform_func, feature_extractor, doc = None):
+def convert_to_trainable_format(raw_title, title_transform_func, feature_extractor, docpath = None):
     """
     Given some title(before capitalization), return the trainable(for CRF-suite) format
     
@@ -127,8 +127,13 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
     words = nltk.word_tokenize(raw_title)
 
     transformed_words = title_transform_func(title_words = words)
-        
-    words_with_features = feature_extractor.extract(transformed_words)
+
+    kwargs={}
+
+    if docpath:
+        kwargs['docpath']=docpath
+
+    words_with_features = feature_extractor.extract(transformed_words, **kwargs)
 
     #add the labels
     for word_str, word_info in zip(words, words_with_features):
@@ -139,8 +144,7 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
 def print_trainable_data(path, 
                          extractor, feature_names,
                          start, end = None,
-                         title_transform_func = make_capitalized_title,
-                         content_extractor = None):
+                         title_transform_func = make_capitalized_title):
     """
     >>> extractor = FeatureExtractor()
     >>> print_trainable_data(path = "data/title_test.txt", extractor = extractor, feature_names = extractor.feature_names, start = 0, end = 1, title_transform_func = make_capitalized_title) #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -166,11 +170,8 @@ def print_trainable_data(path,
             words = convert_to_trainable_format(title,
                                                 title_transform_func,
                                                 extractor,
-                                                (content_extractor(fname) 
-                                                 if content_extractor and callable(content_extractor) 
-                                                 else None)
+                                                docpath=fname
                                             )
-            
 
             for word in words:
                 word_feature_str = ' '.join([unicode(word[feature_name]) for feature_name in feature_names])
