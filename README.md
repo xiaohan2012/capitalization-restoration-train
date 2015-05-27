@@ -2,6 +2,28 @@
 
 ## Train the model
 
+### Preparing data
+
+```
+./make_data.sh
+```
+
+### Train models
+
+Either run `./all_feature_experiments.sh` or `./all_training_size_experiments.sh` to prepare the scripts.
+
+Then `./distribute.sh training_size_experiments_commands.sh|feature_experiments_commands.sh` to distribute it across ukko cluster
+
+To change the machines to deploy upon, change `servers.lst` file.
+
+### Model path
+
+They lie under `/cs/taatto/home/hxiao/capitalization-recovery/result/`.
+
+For example: for lower case, training sie 3000, the model is
+
+`/cs/taatto/home/hxiao/capitalization-recovery/result/training_size/lower/30000/`
+
 ## Python interface
 
 ```
