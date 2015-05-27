@@ -1,10 +1,10 @@
 #! /bin/bash
 
-# ops=(lower upper cap)
-# sizes=(5000 10000 15000 20000 25000 30000)
+ops=(lower upper cap)
+sizes=(5000 10000 15000 20000 25000 30000)
 
-ops=(upper)
-sizes=(30000)
+# ops=(upper)
+# sizes=(30000)
 
 for size in "${sizes[@]}"
 do
@@ -15,7 +15,14 @@ do
 		if [ ! -d corpus/news_title_$op/$size/ ]; then
 			mkdir -p corpus/news_title_$op/$size/
 		fi
-		python data.py fnames_and_titles.txt $op 0 $size > corpus/news_title_$op/$size/train.txt
-		python data.py fnames_and_titles.txt $op 30001  > corpus/news_title_$op/$size/test.txt
+		home_train_path=corpus/news_title_$op/$size/train.txt
+		home_test_path=corpus/news_title_$op/$size/test.txt
+		dest_train_path=/cs/taatto/home/hxiao/capitalization-recovery/$home_train_path
+		dest_test_path=/cs/taatto/home/hxiao/capitalization-recovery/$home_test_path
+		python data.py fnames_and_titles.txt $op 0 $size > $home_train_path
+		python data.py fnames_and_titles.txt $op 30001  > $home_test_path
+
+		cp $home_train_path $dest_train_path
+		cp $home_test_path $dest_test_path
 	done
 done
