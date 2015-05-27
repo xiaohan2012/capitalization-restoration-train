@@ -188,7 +188,7 @@ class AllUppercaseFeature(Feature):
     name = "all-letter-uppercase"
 
     @classmethod
-    def get_value(cls, t, words, **kwargs):
+    def get_value(cls, t, words, **kwargs):        
         word = words[t].translate(cls.table)  # Remove punctuations + numbers
         if len(word) > 0:
             return (word.upper() == word)
@@ -303,3 +303,17 @@ class FeatureExtractor(object):
     @property
     def feature_names(self):
         return [feature.name for feature in self.features]
+
+
+class FeatureExtractorWithoutDocumentFeature(FeatureExtractor):
+    def __init__(self):
+        features = [WordFeature, IsLeadingWordFeature,
+                    LowercaseInDictionaryFeature,
+                    UppercaseInDictionaryFeature,
+                    CapitalizedInDictionaryFeature,
+                    OriginalInDictionaryFeature,
+                    AllUppercaseFeature,
+                    BeginsWithAlphaFeature,
+                    ContainsPunctuationFeature,
+                    POSFeature]
+        super(FeatureExtractorWithoutDocumentFeature, self).__init__(features)
