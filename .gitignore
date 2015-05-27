@@ -64,3 +64,7 @@ models/
 errors/
 
 *_scripts
+
+result/
+corpus/
+capitalization_effect/dumps/*

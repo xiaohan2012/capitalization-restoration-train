@@ -1,0 +1,29 @@
+/group/home/puls/Shared/capitalization-recovery/10/www.prnewswire.com.rss.heavy-industry-manufacturing.aerospace-defense-news/B07D39DF75F880FD4DB762F3FE93C45B
+/group/home/puls/Shared/capitalization-recovery/10/www.prnewswire.com.rss.consumer-products-retail.household-consumer-cosmetics-news/EE37BC55CC7EB01271299D0AFB2201FE
+/group/home/puls/Shared/capitalization-recovery/10/www.prnewswire.com.rss.business-technology.all-business-technology-news/4E1B96EBFB2A19D40C402CA52EE3DC4B
+
+Many unicode titles
+/group/home/puls/Shared/capitalization-recovery/10/feeds.businesswire.com.BW.Merger/C0FA3C64F06B92D8E37EE75682D0F667
+
+Should `is` be lowered?
+
+`van`: 
+Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock
+
+FIIs, Win Phone(should be cap, but lowerer)
+
+PRNewswire: annoying, can be removed
+
+Safeway ( SWY ) **Gains** **Momentum** on **Better-than-Expected** Q3 ( Revised ) - Analyst Blog
+is monocase and misclassified
+
+
+Some cap seems to emphasize the word: 
+
+TVS motor launches new fully synthetic engine **Oil**
+
+stuff like this 'word'
+
+'Chevy
+
+'m, 's, 're

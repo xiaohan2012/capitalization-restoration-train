@@ -1,0 +1,9 @@
+python chunk.py upper > results/chunk_upper.txt
+python chunk.py lower > results/chunk_lower.txt
+python chunk.py > results/chunk.txt
+python pos.py upper > results/pos_upper.txt
+python pos.py lower > results/pos_lower.txt
+python pos.py > results/pos.txt
+python parse.py upper > results/parse_upper.txt
+python parse.py lower > results/parse_lower.txt
+python parse.py > results/parse.txt

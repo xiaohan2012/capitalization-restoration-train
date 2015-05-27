@@ -9,7 +9,8 @@ from util import transform_words
 def load_test_data(filename):
     """
     Load test data including features and label
-
+    
+    Return (list of features, label)
     """
     with open(filename, "r", "utf8") as f:
         sent = []

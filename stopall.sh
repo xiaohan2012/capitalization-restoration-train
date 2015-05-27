@@ -1,22 +1,23 @@
 #! /bin/bash
 
-if [ -z "$1" ]
-then
-	echo "Server list should be specified"
-	exit
+program=$1
+if [ -z "$program" ]; then
+	echo "program name should be given as the first argument"
+	exit -1
 fi
 
-if [ -z "$2" ]
-then
-	echo "Task name should be specified"
-	exit
-fi
+username=$(whoami)
 
-while read line
-do
-    server=$line
-    echo "Stopping $server.."
-    ssh $server.hpc.cs.helsinki.fi 'bash -s' < killscreen.sh "$2"
-done < $1
+servers=$(<servers.lst)
+echo "SERVERS TO STOP: "
+echo $servers
+
+IFS=',' read -ra servers <<< "$servers"
+
+for server in "${servers[@]}"; do
+    echo "Stopping tasks on $server.."
+	echo "ssh $server pkill -2 -u $username $program"
+    ssh $server pkill -2 -u $username $program
+done
 
 

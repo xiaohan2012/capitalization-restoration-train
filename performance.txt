@@ -1,0 +1,81 @@
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (116386, 117196, 118242) (0.9931, 0.9843, 0.9887)
+    L: (312693, 314549, 313503) (0.9941, 0.9974, 0.9958)
+    I: (167084, 167084, 167084) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995729, 0.993907, 0.994811)
+Item accuracy: 596163 / 598829 (0.9955)
+Instance accuracy: 67610 / 70179 (0.9634)
+Elapsed time: 7.890000 [sec] (8894.7 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (114849, 115698, 116923) (0.9927, 0.9823, 0.9874)
+    L: (309151, 311226, 310000) (0.9933, 0.9973, 0.9953)
+    I: (170913, 170913, 170914) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995332, 0.993172, 0.994242)
+Item accuracy: 594913 / 597837 (0.9951)
+Instance accuracy: 67363 / 70179 (0.9599)
+Elapsed time: 7.830000 [sec] (8962.8 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (115057, 115952, 117195) (0.9923, 0.9818, 0.9870)
+    L: (311003, 313142, 311898) (0.9932, 0.9971, 0.9951)
+    I: (171610, 171610, 171611) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995150, 0.992961, 0.994045)
+Item accuracy: 597670 / 600704 (0.9949)
+Instance accuracy: 67274 / 70179 (0.9586)
+Elapsed time: 8.740000 [sec] (8029.6 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (100867, 101658, 102630) (0.9922, 0.9828, 0.9875)
+    L: (273603, 275367, 274394) (0.9936, 0.9971, 0.9954)
+    I: (150539, 150539, 150540) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995271, 0.993311, 0.994282)
+Item accuracy: 525009 / 527564 (0.9952)
+Instance accuracy: 59061 / 61522 (0.9600)
+Elapsed time: 7.320000 [sec] (8404.6 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (115190, 116091, 117305) (0.9922, 0.9820, 0.9871)
+    L: (310031, 312146, 310932) (0.9932, 0.9971, 0.9952)
+    I: (172757, 172757, 172757) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995154, 0.993024, 0.994079)
+Item accuracy: 597978 / 600994 (0.9950)
+Instance accuracy: 67275 / 70179 (0.9586)
+Elapsed time: 8.060000 [sec] (8707.1 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (116640, 117394, 118510) (0.9936, 0.9842, 0.9889)
+    L: (311957, 313827, 312711) (0.9940, 0.9976, 0.9958)
+    I: (166297, 166297, 166297) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995873, 0.993937, 0.994896)
+Item accuracy: 594894 / 597518 (0.9956)
+Instance accuracy: 67641 / 70179 (0.9638)
+Elapsed time: 8.250000 [sec] (8506.5 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (117434, 118235, 119386) (0.9932, 0.9836, 0.9884)
+    L: (310690, 312642, 311491) (0.9938, 0.9974, 0.9956)
+    I: (169644, 169644, 169644) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995661, 0.993693, 0.994668)
+Item accuracy: 597768 / 600521 (0.9954)
+Instance accuracy: 67511 / 70179 (0.9620)
+Elapsed time: 8.330000 [sec] (8424.8 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (116967, 117794, 118872) (0.9930, 0.9840, 0.9885)
+    L: (313242, 315147, 314069) (0.9940, 0.9974, 0.9957)
+    I: (167833, 167833, 167833) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995645, 0.993780, 0.994705)
+Item accuracy: 598042 / 600774 (0.9955)
+Instance accuracy: 67534 / 70179 (0.9623)
+Elapsed time: 8.140000 [sec] (8621.5 [instance/sec])
+
+Performance by label (#match, #model, #ref) (precision, recall, F1):
+    C: (36761, 37020, 37350) (0.9930, 0.9842, 0.9886)
+    L: (100490, 101079, 100749) (0.9942, 0.9974, 0.9958)
+    I: (52338, 52338, 52338) (1.0000, 1.0000, 1.0000)
+Macro-average precision, recall, F1: (0.995726, 0.993887, 0.994799)
+Item accuracy: 189589 / 190437 (0.9955)
+Instance accuracy: 21408 / 22223 (0.9633)
+Elapsed time: 4.110000 [sec] (5407.1 [instance/sec])

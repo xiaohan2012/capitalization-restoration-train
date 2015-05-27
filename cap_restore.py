@@ -10,7 +10,7 @@ _CAPRESTORER = None
 _LOWERRESTORER = None
 _UPPERRESTORER = None
 
-def restore(words):
+def restore(words, *args, **kwargs):
     """
     Restore the capitalization of given words
     
@@ -30,15 +30,15 @@ def restore(words):
     if capitalized(words):
         if not _CAPRESTORER:
             _CAPRESTORER = CapRestorer()
-        return _CAPRESTORER.restore(words)
+        return _CAPRESTORER.restore(words, *args, **kwargs)
     elif all_lowercase(words):
         if not _LOWERRESTORER:
             _LOWERRESTORER = LowerRestorer()
-        return _LOWERRESTORER.restore(words)
+        return _LOWERRESTORER.restore(words, *args, **kwargs)
     elif all_uppercase(words):
         if not _UPPERRESTORER:
             _UPPERRESTORER = UpperRestorer()
-        return _UPPERRESTORER.restore(words)
+        return _UPPERRESTORER.restore(words, *args, **kwargs)
     else:
         sys.stderr.write("Seems to be in proper capitalization\n")
         return words
@@ -50,18 +50,18 @@ class Restorer(object):
         self.extractor = FeatureExtractor()
         self.templates = load_feature_templates()
 
-    def get_labels(self, sent):
+    def get_labels(self, sent, *args, **kwargs):
         assert isinstance(sent, list)
         
-        words_with_features = self.extractor.extract(sent)
+        words_with_features = self.extractor.extract(sent, *args, **kwargs)
 
         for word in words_with_features: # accord to crfsuite 
             word["F"] = []
                
         return self.tagger.tag(apply_templates(words_with_features, self.templates))
 
-    def restore(self, sent):
-        labels = self.get_labels(sent)
+    def restore(self, sent, *args, **kwargs):
+        labels = self.get_labels(sent, *args, **kwargs)
         return transform_words_by_labels(sent, labels)
 
 class CapRestorer(Restorer):
@@ -119,3 +119,23 @@ def transform_words_by_labels(words, labels):
             raise ValueError("Unknown label %s" %(l))
 
     return new_words
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Restore the sentence capitalization')
+    parser.add_argument('-s', dest="sentence", type=str, required=True,
+                        help='an integer for the accumulator')
+    parser.add_argument('--docpath', type=str, required=False,
+                        help='Path to the document associated with the sentence')
+
+    args = parser.parse_args()
+
+    kwargs={}
+    if parser.docpath:
+        kwargs['docpath'] = parser.docpath
+
+    restore(parser.sentence, **kwargs)
+
+        

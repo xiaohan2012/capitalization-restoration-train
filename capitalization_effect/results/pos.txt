@@ -1,0 +1,5 @@
+                  precision recall    f1-score support
+upper             0.56      0.43      0.46     13007
+lower 			  0.56      0.60      0.57     13007
+cap				  0.56      0.52      0.53     13007
+normal            0.56      0.60      0.58     13007

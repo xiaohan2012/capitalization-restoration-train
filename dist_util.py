@@ -29,14 +29,16 @@ python data.py {raw_data_path} > {target_file_path}/{file_name}
         with open("deploy_scripts/%s.sh" %(server), "w") as f:
             f.write(content)
 
-
 def gen_cv_scripts(task_name, servers, group, feature_groups, data_dir, tmp_dir):
     """
     task_name: screen name also
     group: uppercase or monocase
     """
-    script_paths = "%s_scripts" %(task_name)
+    script_paths = "deploy_scripts/%s/%s" %(group, "+".join(group.split()))
     
+    if not os.path.exists(script_paths):
+        os.makedirs(script_paths)
+        
     for p in glob("%s/*.sh" %(script_paths)):
         sys.stderr.write("removing %s\n" %(p))
         os.remove(p)
@@ -45,6 +47,8 @@ def gen_cv_scripts(task_name, servers, group, feature_groups, data_dir, tmp_dir)
     assert len(servers) == len(data_paths) * len(feature_groups), "%d != %d" %(len(servers),
                                                                                len(data_paths)  * len(feature_groups))
 
+    servers_file = open("%s/servers.txt" %(script_paths), "w")
+    
     data_paths = set(glob(data_dir))
     for feature_group in feature_groups:
         sys.stderr.write("Feature group: %s\n" %("+".join(feature_group.split())))
@@ -70,11 +74,14 @@ def gen_cv_scripts(task_name, servers, group, feature_groups, data_dir, tmp_dir)
                 f.write("./crfsuite-0.12/bin/crfsuite tag -qt -m {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt > {tmp_dir}/{group}/{feature_group_dir}/result-{test_data_id}.txt\n".format(**locals()))
                 # clean it up
 
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt\n".format(**locals())) # remove test data
-                f.write("rm {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model\n".format(**locals())) # remove model 
+                # f.write("rm {tmp_dir}/{group}/{feature_group_dir}/test-{test_data_id}.crfsuite.txt\n".format(**locals())) # remove test data
+                # f.write("rm {tmp_dir}/{group}/{feature_group_dir}/cap-{test_data_id}.model\n".format(**locals())) # remove model 
                 f.write("\"\n")
-
-
+                
+            servers_file.write("%s\n", server)
+            
+    servers_file.close()
+    
 if __name__ == "__main__":
     
     from datetime import datetime
@@ -85,6 +92,8 @@ if __name__ == "__main__":
                      3: (145, 192),
                      4: (193, 240)}
     which_day = datetime.today().weekday()
+    logging.info("Excluding %s",  exclude_table.get(which_day, None))
+    
     servers = [s for s, _ in best_n(10,
                                     exclude_number_range = exclude_table.get(which_day, None),
                                     exclude_numbers = [125, 146])]
@@ -120,4 +129,4 @@ if __name__ == "__main__":
                    "/cs/taatto/home/hxiao/capitalization-recovery/data/{data_group}/trainable/*".format(**locals()),
                    "/cs/taatto/home/hxiao/capitalization-recovery/tmp")
     
-    print "\n".join(servers)                
+    print "\n".join(servers)

@@ -45,7 +45,7 @@ id2featue = {
     6: document_features
 }
 
-def load_feature_templates(feature_ids = [1,2,3,4,5]):
+def load_feature_templates(feature_ids = [1,2,3,4,5,6]):
     templates = []
 
     for fid in feature_ids:
