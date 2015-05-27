@@ -5,12 +5,14 @@ import nltk
 
 from util import get_document_content_paf
 
+
 class Feature(object):
     name = None
 
     @classmethod
     def get_value(cls, t, words, **kwargs):
         raise NotImplementedError
+
 
 class WordFeature(Feature):
     """
@@ -42,6 +44,7 @@ class POSFeature(Feature):
         else:
             raise KeyError("'pos' is not in arguments")
 
+
 class IsLeadingWordFeature(Feature):
     """
     If the word is the first one of the sentence or not
@@ -56,6 +59,7 @@ class IsLeadingWordFeature(Feature):
     @classmethod
     def get_value(cls, t, words, **kwargs):
         return t == 0
+
 
 class BeginsWithAlphaFeature(Feature):
     """
@@ -75,6 +79,7 @@ class BeginsWithAlphaFeature(Feature):
 
 d = enchant.Dict("en_US")
 
+
 class LowercaseInDictionaryFeature(Feature):
     """
     If the uppercase word is in dictionary
@@ -86,10 +91,11 @@ class LowercaseInDictionaryFeature(Feature):
     """
 
     name = "lower-in-dict"
-    
+
     @classmethod
     def get_value(cls, t, words, **kwargs):
         return d.check(words[t].lower())
+
 
 class UppercaseInDictionaryFeature(Feature):
     """
@@ -102,10 +108,11 @@ class UppercaseInDictionaryFeature(Feature):
     """
 
     name = "upper-in-dict"
-    
+
     @classmethod
     def get_value(cls, t, words, **kwargs):
         return d.check(words[t].upper())
+
 
 class OriginalInDictionaryFeature(Feature):
     """
@@ -117,10 +124,11 @@ class OriginalInDictionaryFeature(Feature):
     False
     """
     name = "orig-in-dict"
-    
+
     @classmethod
     def get_value(cls, t, words, **kwargs):
         return d.check(words[t])
+
 
 class ContainsPunctuationFeature(Feature):
     """
@@ -132,14 +140,16 @@ class ContainsPunctuationFeature(Feature):
     False
     """
     name = "has-punct"
-    
+
     punct = set(string.punctuation)
+
     @classmethod
     def get_value(cls, t, words, **kwargs):
         for l in words[t]:
             if l in cls.punct:
                 return True
         return False
+
 
 class CapitalizedInDictionaryFeature(Feature):
     """
@@ -151,15 +161,16 @@ class CapitalizedInDictionaryFeature(Feature):
     False
     """
     name = "cap-in-dict"
-    
+
     @classmethod
     def get_value(cls, t, words, **kwargs):
         return d.check(words[t].capitalize())
 
+
 class AllUppercaseFeature(Feature):
     """
     If the letters in word is all uppercased
-    
+
     >>> AllUppercaseFeature.get_value(0, [u'U.S.'])
     True
     >>> AllUppercaseFeature.get_value(0, [u'Ad'])
@@ -168,7 +179,7 @@ class AllUppercaseFeature(Feature):
     False
     >>> AllUppercaseFeature.get_value(0, [u'HAO123'])
     True
-    >>> AllUppercaseFeature.get_value(0, [u'FIIs'])    
+    >>> AllUppercaseFeature.get_value(0, [u'FIIs'])
     False
     """
     exclude = unicode(string.punctuation + ''.join([str(i) for i in xrange(10)]))
@@ -178,7 +189,7 @@ class AllUppercaseFeature(Feature):
 
     @classmethod
     def get_value(cls, t, words, **kwargs):
-        word = words[t].translate(cls.table) # Remove punctuations + numbers
+        word = words[t].translate(cls.table)  # Remove punctuations + numbers
         if len(word) > 0:
             return (word.upper() == word)
         else:
@@ -242,19 +253,6 @@ DEFAULT_FEATURES = [
     POSFeature,
     CapitalizedInDocumentFeature
 ]
-
-# to solve the backward compatability issue
-# Deprecated
-VALUE_LABEL_MAPPING = {
-    IsLeadingWordFeature: {True: 'HEAD', False: 'OTHER'},
-    LowercaseInDictionaryFeature: {True: 'LOWER_IN_DICT', False: 'OTHER'},
-    CapitalizedInDictionaryFeature: {True: 'CAP_IN_DICT', False: 'OTHER'},
-    UppercaseInDictionaryFeature: {True: 'UPPER_IN_DICT', False: 'OTHER'},
-    OriginalInDictionaryFeature: {True: 'ORG_IN_DICT', False: 'OTHER'},
-    BeginsWithAlphaFeature: {True: 'BEGINS_WITH_ALPHA', False: 'OTHER'},
-    AllUppercaseFeature: {True: 'ALL_UPPER', False: 'OTHER'},
-    ContainsPunctuationFeature: {True: 'HAS_PUNCT', False: 'OTHER'}
-}
 
 
 class FeatureExtractor(object):
