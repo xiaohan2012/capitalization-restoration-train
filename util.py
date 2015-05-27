@@ -71,6 +71,33 @@ def get_document_content(path):
     with decode_open(path, "r", "utf8", "ignore") as doc:
         return doc.read()
 
+def is_monocase(title_words):
+    """
+    Determine if the title words are already capitalized
+
+    >>> is_monocase("Global Eagle Entertainment and SES Sign a Strategic Partnership to Deliver Global Ku-Band Satellite in-Flight Connectivity to Airlines".split())
+    True
+    >>> is_monocase("Agenda Released for the 17th annual Summit on Superbugs & Superdrugs".split())
+    False
+    >>> is_monocase("How Find Your Inner Martin Scorsese to Build Brand & Rule the World".split())
+    True
+    >>> is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split()) # `is`
+    True
+    >>> is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split()) # `van`
+    True
+    """
+    for word in title_words[1:]:
+        prefix = word.split("-")[0] #handle the in-Flight case
+        should_be_lower = lambda w: (w in ARTICLES or
+                                     w in PREPOSITIONS or
+                                     w in CONJUNCTIONS)
+
+        if should_be_lower(word) or should_be_lower(prefix):
+            continue
+        elif word[0].isalpha() and word[0].lower() == word[0]: # there is some lower cased words besides articles prepositions and conjunctions
+            return False
+
+    return True
 
 # Mapping for non-standard punctuations to standard ones
 
