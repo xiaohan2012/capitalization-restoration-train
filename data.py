@@ -21,7 +21,7 @@ from word_shape_util import (without_alpha,
                              contains_lowercase, 
                              contains_uppercase)
 
-from feature_extractor import FeatureExtractor
+from capitalization_restoration.feature_extractor import FeatureExtractor
 
 def print_filenames_and_titles():
     """print title each per one line from the corpus"""
@@ -114,15 +114,15 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
     Given some title(before capitalization), return the trainable(for CRF-suite) format
     
     >>> from cap_transform import make_capitalized_title
-    >>> from feature_extractor import FeatureExtractor
+    >>> from capitalization_restoration.feature_extractor import FeatureExtractor
     >>> extractor = FeatureExtractor()
-    >>> sent = convert_to_trainable_format(u"CIS FMs hold summit in Belarus on Oct 10", make_capitalized_title, extractor)
+    >>> sent = convert_to_trainable_format(u"Why oil prices will be 'robust' long-term: Shell CEO", make_capitalized_title, extractor, docpath="test_data/oil-price")
     >>> sent[2]["word"]
-    u'Hold'
+    u'Prices'
     >>> sent[5]["lower-in-dict"]
     False
     >>> sent[1]["y"]
-    'MX'
+    'AL'
     """
     words = nltk.word_tokenize(raw_title)
 
@@ -147,15 +147,20 @@ def print_trainable_data(path,
                          title_transform_func = make_capitalized_title):
     """
     >>> extractor = FeatureExtractor()
-    >>> print_trainable_data(path = "data/title_test.txt", extractor = extractor, feature_names = extractor.feature_names, start = 0, end = 1, title_transform_func = make_capitalized_title) #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    One True True True True True False True False CD IC
+    >>> print_trainable_data(path = "test_data/mixed-case.info", extractor = extractor, feature_names = extractor.feature_names, start = 0, end = 1, title_transform_func = make_capitalized_title) #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    One True True True True True False True False CD False True IC
     ...
-    PaaS False False False False False False True False NNP MX
+    PaaS False False False False False False True False NNP True False MX
     ...
-    IBM False False True False True True True False NNP AU
+    Heroku False False False False False False True False NNP False False IC
+    ...
+    IBM False False True False True True True False NNP True False AU
     ...
     """
     feature_names += ['y'] #add the label feature name
+
+    # sys.stderr.write(" ".join(feature_names) + "\n")
+
     i = 0
     with open(path, "r", "utf8") as f:
         for line in f:
@@ -173,6 +178,7 @@ def print_trainable_data(path,
                                                 docpath=fname
                                             )
 
+            # print the features in the required format
             for word in words:
                 word_feature_str = ' '.join([unicode(word[feature_name]) for feature_name in feature_names])
                 print unicode(word_feature_str).encode('utf8')

@@ -4,9 +4,13 @@
 
 ### Preparing data
 
-```
-./make_data.sh
-```
+
+    ./make_data.sh
+
+
+Note:
+
+Everytime you want to add more features, you only need to run this script once.
 
 ### Train models
 
