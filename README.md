@@ -43,6 +43,14 @@ Run
 >>> python cap_restore.py -h
 ```
 
+## Error analysis utility
+
+The `pred_err.py` util will print out the error examples as well as confusion matrix
+
+    > # Example: python pred_err.py ${model_path} ${test_sentence_path} ${test_sentence_feature_path}
+	> DATA_ROOT=/cs/taatto/home/hxiao/capitalization-recovery
+    > python pred_err.py ${DATA_ROOT}/result/feature/cap/1+2+3+4+5+6/model ${DATA_ROOT}/corpus/news_title_cap/30000/test.txt ${DATA_ROOT}/result/feature/cap/1+2+3+4+5+6/test.crfsuite.txt
+
 ## TODO
 - Add more features to handle mixed-case words, for example: TSX-Venture, or split the word by the hyphen
 - In capitalized titles(more information is preserved), some words are already all-uppercase/mixed-cased. Dictionary feature does not take into account mixed case words.

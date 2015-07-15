@@ -4,6 +4,7 @@
 Util functions
 """
 import os, re, sys, traceback
+
 import logging
 logging.basicConfig(format='%(asctime)s: %(message)s', datefmt = "%H:%M:%S")
 
@@ -21,6 +22,7 @@ import json
 
 from ground_truth import (ARTICLES, PREPOSITIONS, CONJUNCTIONS)
 
+
 def get_file_names(paths = ["/group/home/puls/Shared/capitalization-recovery/12"]):
     """
     Get all document file paths    
@@ -32,6 +34,7 @@ def get_file_names(paths = ["/group/home/puls/Shared/capitalization-recovery/12"
                     yield file_path
 
 title_pos_regexp = re.compile(r"^(\d+) (\d+) Headline type main$")
+
 
 def get_title_position(path):
     """
@@ -49,6 +52,7 @@ def get_title_position(path):
 
     raise Exception("Unable to find start and end position for %s" %path)
             
+
 def get_document_content_paf(path):
     """
     Content extractor for PAF file
@@ -61,6 +65,7 @@ def get_document_content_paf(path):
         content = doc.read()
         return "".join(content[end:])
 
+
 def get_document_content(path):
     """
     Get the actual content of the document
@@ -70,6 +75,7 @@ def get_document_content(path):
     """
     with decode_open(path, "r", "utf8", "ignore") as doc:
         return doc.read()
+
 
 def is_monocase(title_words):
     """
