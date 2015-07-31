@@ -23,7 +23,7 @@ import json
 from ground_truth import (ARTICLES, PREPOSITIONS, CONJUNCTIONS)
 
 
-def get_file_names(paths = ["/group/home/puls/Shared/capitalization-recovery/12"]):
+def get_file_names(paths=["/group/home/puls/Shared/capitalization-recovery/12"]):
     """
     Get all document file paths    
     """
@@ -258,6 +258,72 @@ def clean_title_file(path):
             words = nltk.word_tokenize(obj[1])
             if is_monocase(words):
                 print l, 
+
+
+def load_crfsuite_format_data(file_obj):
+    """
+    Load crfsuite format data and return data instances(each instance is a sentence)
+
+    Param:
+    ------
+    file_obj: file-like object
+
+    Return:
+    ------
+    list of list of dict: the feature values
+    list of list of str: the labels
+    
+    
+    >>> X, Y = load_crfsuite_format_data(open("test_data/labeled.crfsuite.txt", "r"))
+    >>> len(X), len(Y)
+    (3, 3)
+    >>> map(len, X)
+    [12, 8, 13]
+    >>> X[0][0]["word[0]|word[1]"]
+    "\'Messed|up"
+    >>> X[0][0]['__BOS__']
+    1
+    >>> X[0][0]['has-punct[0]']
+    1
+    >>> X[0][1]['has-punct[0]']
+    0
+    >>> map(len, Y)
+    [12, 8, 13]
+    >>> Y[0][0]
+    'MX'
+    """
+    X = []
+    Y = []
+    words = []
+    labels = []
+    for l in file_obj:
+        word_features = {}
+        if len(l.strip()) == 0:
+            # we start a new sentence
+            X.append(words)
+            Y.append(labels)
+            words = []
+            labels = []
+        else:
+            segments = l.split('\t')
+            labels.append(segments[0])
+            
+            for seg in segments[1:]:
+                if '=' in seg:
+                    try:
+                        feat_key, feat_val = seg.split("=", 1)
+                    except ValueError:
+                        feat_val = feat_val.strip()
+                    if feat_val in ('True', 'False'):
+                        word_features[feat_key] = (1
+                                                   if feat_val == 'True'
+                                                   else 0)
+                    else:
+                        word_features[feat_key] = feat_val
+                else:
+                    word_features[seg.strip()] = 1
+            words.append(word_features)
+    return X, Y
 
 
 if __name__ == "__main__":

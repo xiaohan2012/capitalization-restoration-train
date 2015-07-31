@@ -6,7 +6,7 @@ from codecs import open
 from itertools import izip
 from sklearn.metrics import confusion_matrix
 from pandas import DataFrame as df
-
+from collections import Counter
 
 def load_test_data(filename):
     """
@@ -75,6 +75,9 @@ if __name__ == "__main__":
     pred_y = []
     true_y = []
     
+    word_counter = Counter()
+    feature_counter = Counter()
+
     for words, s in izip(
             load_sents(content_path),
             load_test_data(test_data_path)):
@@ -96,10 +99,19 @@ if __name__ == "__main__":
                                  pl == args.pred_label,
                                  izip(correct_labels, predicted_labels))
             if np.any(display_or_not):
-                # add some high lighting
+                for w, word_features, flag in \
+                    izip(words, features,
+                         display_or_not):
+                    if flag:
+                        word_counter[w] += 1
+                        for feat in word_features:
+                            feature_counter[feat] += 1
+                            
+                # add some high lighting                
                 words = [("**" + w + "**" if flag else w)  
                          for w, flag in izip(words, display_or_not)]
-                
+
+                word_counter
                 max_widths = [max([len(w), len(cl), len(pl)]) 
                               for w, cl, pl in 
                               izip(words, correct_labels, predicted_labels)]
@@ -132,7 +144,8 @@ if __name__ == "__main__":
                index=map(lambda s: '{}_true'.format(s), labels),
                columns=map(lambda s: '{}_pred'.format(s), labels))
     print table
-
+    print word_counter.most_common(10)
+    print feature_counter.most_common(10)
     # import sys
     # sys.stderr.write("Confusion matrix:\n")
     # sys.stderr.write("{}".format(cm))
