@@ -2,37 +2,51 @@
 import codecs
 import numpy as np
 import pickle
-from itertools import chain
+from itertools import (chain, izip)
+import pandas as pds
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
-from sklearn import svm
 from sklearn.metrics import (classification_report, accuracy_score,
-                             precision_recall_fscore_support)
+                             precision_recall_fscore_support,
+                             confusion_matrix)
+from sklearn.externals import joblib
+from sklearn.grid_search import GridSearchCV
 
 from scipy_util import (load_sparse_csr, save_sparse_csr)
 
 from util import load_crfsuite_format_data
+from unigram import UnigramLabeler
 
-from sklearn.grid_search import GridSearchCV
+from error_display import print_label_error
 
 # turn this ON when you want to rebuild the data matrices
 LOAD_FROM_CACHE = 1
+RETRAIN_MODEL = 0
+ERROR_REPORT = 1
 
 # Data preparation
 
-if not LOAD_FROM_CACHE:
-    train_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/train.crfsuite.txt"
-    test_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/test.crfsuite.txt"
+train_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/train.crfsuite.txt"
+test_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/test.crfsuite.txt"
 
+if not LOAD_FROM_CACHE:
     train_x, train_y = load_crfsuite_format_data(
         codecs.open(train_path, 'r', 'utf8'))
-    test_x, test_y = load_crfsuite_format_data(codecs.open(test_path, 'r', 'utf8'))
+    test_x, test_y = load_crfsuite_format_data(
+        codecs.open(test_path, 'r', 'utf8'))
 
-    train_x, train_y = chain.from_iterable(train_x), chain.from_iterable(train_y)
+    train_x, train_y = (chain.from_iterable(train_x),
+                        chain.from_iterable(train_y))
+
+    # Debugging Purpose
+    # n = 100
+    # train_x = list(train_x)[:n]
+    # train_y = list(train_y)[:n]
+
     test_x, test_y = chain.from_iterable(test_x), chain.from_iterable(test_y)
-
+    
     print "hashing the features"
     dict_vect = DictVectorizer()
 
@@ -58,6 +72,10 @@ if not LOAD_FROM_CACHE:
                           (train_y, test_y)):
         np.save(fname, obj)
     pickle.dump(labels, open('cached_data/labels.pkl', 'w'))
+
+    # Dump DictVectorizer and LabelEncoder
+    pickle.dump(dict_vect, open('cached_data/dict_vect.pkl', 'w'))
+    pickle.dump(label_encoder, open('cached_data/label_encoder.pkl', 'w'))
         
 else:
     print "loading data"
@@ -67,50 +85,103 @@ else:
     train_y = np.load('cached_data/train_y.npy')
     test_y = np.load('cached_data/test_y.npy')
     labels = pickle.load(open('cached_data/labels.pkl', 'r'))
+    
+    dict_vect = pickle.load(open('cached_data/dict_vect.pkl', 'r'))
+    label_encoder = pickle.load(open('cached_data/label_encoder.pkl', 'r'))
 
-# Train
-print "training model"
+if RETRAIN_MODEL:
+    # Train
+    print "training model"
 
-# model = LogisticRegression(verbose=2)
-model = svm.SVC()
+    model = LogisticRegression(penalty='l2',
+                               C=1.0,
+                               verbose=2)
 
-# param_grid = {'penalty': ['l1', 'l2'],
-#               'C': [0.1, 1, 10]}
-param_grid = {'kernel': ('linear', 'rbf'),
-              'C': [1, 10]}
+    # Uncomment when you want grid search
+    # param_grid = {'penalty': ['l1', 'l2'],
+    #               'C': [0.1, 1, 10]}
+    # model = GridSearchCV(LogisticRegression(verbose=2), param_grid=param_grid,
+    #                      verbose=2, n_jobs=6)
 
-grid_model = GridSearchCV(model, param_grid=param_grid, verbose=2, n_jobs=12)
+    model.fit(train_x, train_y)
+    print model
 
-grid_model.fit(train_x, train_y)
-print grid_model
+    pred_y = model.predict(test_x)
 
-pred_y = grid_model.predict(test_x)
+    # Evaluation
+    print "Evaluation summary:"
 
-# Evaluation
-print "Evaluation summary:"
+    print "Subset accuracy: %.2f\n" % \
+        (accuracy_score(test_y, pred_y) * 100)
 
-print "Subset accuracy: %.2f\n" % \
-    (accuracy_score(test_y, pred_y) * 100)
+    # print "Accuracy(Jaccard): %.2f\n" % (jaccard_similarity_score(test_y, pred_y))
 
-# print "Accuracy(Jaccard): %.2f\n" % (jaccard_similarity_score(test_y, pred_y))
-
-# p_ex, r_ex, f_ex, _ = precision_recall_fscore_support(test_y, pred_y,
-#                                                       average="samples")
-print classification_report(test_y, pred_y,
-                            target_names=labels,
-                            digits=4)
-
-
-p_mac, r_mac, f_mac, _ = precision_recall_fscore_support(test_y, pred_y,
-                                                         average="macro")
-
-print "Precision/Recall/F1(macro) : %.4f  %.4f  %.4f\n" \
-    % (p_mac, r_mac, f_mac)
+    # p_ex, r_ex, f_ex, _ = precision_recall_fscore_support(test_y, pred_y,
+    #                                                       average="samples")
+    print classification_report(test_y, pred_y,
+                                target_names=labels,
+                                digits=4)
 
 
-p_mic, r_mic, f_mic, _ = precision_recall_fscore_support(test_y, pred_y,
-                                                         average="micro")
+    p_mac, r_mac, f_mac, _\
+        = precision_recall_fscore_support(test_y, pred_y,
+                                          average="macro")
 
-print "Precision/Recall/F1(micro) : %.4f  %.4f  %.4f\n" \
-    % (p_mic, r_mic, f_mic)
+    print "Precision/Recall/F1(macro) : %.4f  %.4f  %.4f\n" \
+        % (p_mac, r_mac, f_mac)
 
+
+    p_mic, r_mic, f_mic, _\
+        = precision_recall_fscore_support(test_y, pred_y,
+                                          average="micro")
+
+    print "Precision/Recall/F1(micro) : %.4f  %.4f  %.4f\n" \
+        % (p_mic, r_mic, f_mic)
+    
+    joblib.dump(model, 'cached_data/model.pkl')
+
+else:
+    model = joblib.load('cached_data/model.pkl')
+
+
+if ERROR_REPORT:
+    print "Error examples"
+    test_x_features, test_y = load_crfsuite_format_data(
+        codecs.open(test_path, 'r', 'utf8'))
+    
+    labeler = UnigramLabeler(dict_vect, label_encoder, model)
+    flat_pred_y = labeler.predict(chain.from_iterable(test_x_features))
+    
+    # unflatten the predicted labels
+    pred_y = []
+    current_index = 0
+    for sent_y in test_y:
+        pred_y.append(flat_pred_y[current_index: current_index+len(sent_y)])
+        current_index += len(sent_y)
+    assert len(pred_y) == len(test_x_features)
+
+    sents = [[word['word[0]']
+              for word in words]
+             for words in test_x_features]
+
+    for words, features,\
+        true_labels, pred_labels in izip(sents,
+                                         test_x_features, test_y, pred_y):
+        print_label_error(words, features,
+                          true_labels, pred_labels,
+                          target_true_label='IC', target_pred_label='AL',
+                          print_features=True,
+                          model=model,
+                          dict_vect=dict_vect,
+                          label_encoder=label_encoder)
+
+    print "Confusion matrix:"
+    table = pds.DataFrame(confusion_matrix(list(chain.from_iterable(test_y)),
+                                           list(chain.from_iterable(pred_y)),
+                                           labels=labels),
+                          index=map(lambda s: '{}_true'.format(s), labels),
+                          columns=map(lambda s: '{}_pred'.format(s), labels))
+    print table
+
+
+    

@@ -1,12 +1,13 @@
 """
 Get examples of prediction errors
 """
-import numpy as np
 from codecs import open
 from itertools import izip
 from sklearn.metrics import confusion_matrix
 from pandas import DataFrame as df
 from collections import Counter
+from error_display import print_label_error
+
 
 def load_test_data(filename):
     """
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     for words, s in izip(
             load_sents(content_path),
             load_test_data(test_data_path)):
-        correct_labels = [l for _, l in s]        
+        correct_labels = [l for _, l in s]
 
         features = [f for f, _ in s]
         predicted_labels = tagger.tag(features)
@@ -91,51 +92,10 @@ if __name__ == "__main__":
         pred_y += predicted_labels
         true_y += correct_labels
         
-        if correct_labels != predicted_labels:
-            # we want labels that are both 
-            # incorrect and meet our label specs
-            display_or_not = map(lambda (cl, pl): cl != pl and
-                                 cl == args.true_label and
-                                 pl == args.pred_label,
-                                 izip(correct_labels, predicted_labels))
-            if np.any(display_or_not):
-                for w, word_features, flag in \
-                    izip(words, features,
-                         display_or_not):
-                    if flag:
-                        word_counter[w] += 1
-                        for feat in word_features:
-                            feature_counter[feat] += 1
-                            
-                # add some high lighting                
-                words = [("**" + w + "**" if flag else w)  
-                         for w, flag in izip(words, display_or_not)]
-
-                word_counter
-                max_widths = [max([len(w), len(cl), len(pl)]) 
-                              for w, cl, pl in 
-                              izip(words, correct_labels, predicted_labels)]
-                
-                print '-' * (sum(max_widths) + len(max_widths))
-
-                def style_content(c, w):
-                    return c.ljust(w)
-                        
-                print "Sentence:   ", ' '.join([style_content(word, width)
-                                                for width, word in
-                                                zip(max_widths, words)]).encode("utf8")
-                print "Correct:    ", ' '.join([style_content(cl, width)
-                                                for width, cl in
-                                                zip(max_widths, correct_labels)]).encode("utf8")
-                print "Predicted:  ", ' '.join([style_content(pl, width)
-                                                for width, pl in
-                                                zip(max_widths, predicted_labels)]).encode("utf8")
-                if args.print_features:
-                    print "Features:   "
-                    for word_features, flag in izip(features, display_or_not):
-                        if flag:
-                            print word_features
-
+        print_label_error(words, features,
+                          correct_labels, predicted_labels,
+                          args.true_label, args.pred_label,
+                          args.print_features)
 
     cm = confusion_matrix(true_y, pred_y,
                           labels=labels)
