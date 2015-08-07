@@ -1,5 +1,7 @@
 import json
 import codecs
+import traceback
+
 from pathlib import Path
 
 from toolz.dicttoolz import get_in
@@ -50,10 +52,14 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir):
             auxil_p = p.with_suffix('.auxil')
             paf_p = p.with_suffix('.paf')
             if auxil_p.exists() and paf_p.exists():
-                titles = get_title_from_puls_core_output(
-                    str(auxil_p),
-                    str(paf_p),
-                    str(p))
+                try:
+                    titles = get_title_from_puls_core_output(
+                        str(auxil_p),
+                        str(paf_p),
+                        str(p))
+                except ValueError:  # some .auxil is empty
+                    print "DOCID: {}".format(p)
+                    print(traceback.format_exc())
 
                 # pipeline:
                 # -> get features
