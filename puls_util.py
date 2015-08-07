@@ -47,16 +47,19 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir):
 
     for p in Path(corpus_dir).iterdir():
         if p.suffix == '':
-            titles = get_title_from_puls_core_output(
-                str(p.with_suffix('.auxil')),
-                str(p.with_suffix('.paf')),
-                str(p))
+            auxil_p = p.with_suffix('.auxil')
+            paf_p = p.with_suffix('.paf')
+            if auxil_p.exists() and paf_p.exists():
+                titles = get_title_from_puls_core_output(
+                    str(auxil_p),
+                    str(paf_p),
+                    str(p))
 
-            # pipeline:
-            # -> get features
-            # -> get tokens
-            # -> capitalize headline
-            yield (p.name,
-                   list(map(compose(make_capitalized_title_new,
-                                    get_tokens, get_features),
-                            titles)))
+                # pipeline:
+                # -> get features
+                # -> get tokens
+                # -> capitalize headline
+                yield (p.name,
+                       list(map(compose(make_capitalized_title_new,
+                                        get_tokens, get_features),
+                                titles)))
