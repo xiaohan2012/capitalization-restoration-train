@@ -2,17 +2,22 @@
 Baseline3:
 
 - for each token in the title it finds all its mentions in the text
-- if the token appears only in the title and never appears in the text  ==> it should be lower-cased, # why should it be lower-cased
-- if the token appears in the text only at the beginning of the sentences ==> it stays as it is, i.e. capitalized 
-- if the token at least once appeared in the text not at the beginning of the sentence and capitalized ==> it stays capitalized
+- if the token appears only in the title and never appears in the text  ==> it should be lower-cased, # why should it be lower-cased   ** UNREASONABLE **
+- if the token appears in the text only at the beginning of the sentences ==> it stays as it is, i.e. capitalized   *NOT STRONG* 
+- if the token at least once appeared in the text not at the beginning of the sentence and capitalized ==> it stays capitalized 
 - if all mentions of the token in the text not at the beginning of the sentence are lower cased  ==> it should be lower-cased
 - if the leading letter is non-alphabetical, return intact
+
+Several questions:
+
+- The first rule is unreasonable
+- dictionary should be considered also(especially when the word doesn't appear in the document). 
+  This means we need to select a good dictionary
+- 
 
 """
 
 import nltk
-from data import (appear_capitalized_indoc_label,
-                  get_label)
 
 
 def appear_only_in_title(word, title, sents):
@@ -37,6 +42,7 @@ p
             if w == word:
                 return False
     return True
+
 
 def appear_only_at_sentence_beginning(word, title, sents):
     """
@@ -68,6 +74,7 @@ def appear_only_at_sentence_beginning(word, title, sents):
     else:
         return False
 
+
 def appear_cap_in_sentence_middle(word, title, sents):
     """
     If the token at least once appeared in the text not at the beginning of the sentence and capitalized
@@ -93,6 +100,7 @@ def appear_cap_in_sentence_middle(word, title, sents):
             sent_start = False
             
     return False
+
 
 def all_appear_lower_not_at_sentence_beginning(word, title, sents):
     """
@@ -125,12 +133,30 @@ def all_appear_lower_not_at_sentence_beginning(word, title, sents):
     else:
         return False
 
+
 def lower(word):
     return word[0].lower() + word[1:]
+
 
 def cap(word):
     return word[0].upper() + word[1:]
     
+
+def predict(title_words, doc_words):
+    """
+    Parameter:
+    -----------
+    title_words: list of string
+    
+    doc_words: list of list of string
+
+    Return:
+    ----------
+    list of str: the labels
+    """
+    pass
+
+
 def normalize_title(title = "", words = [], **kwargs):
     """
     >>> from util import make_capitalized_title
@@ -180,6 +206,8 @@ def normalize_title(title = "", words = [], **kwargs):
         else:
             raise ValueError("Unexpected case `%s` in `%r`" %(w, words))
     return normed_words
+
+
 
 if __name__ == "__main__":
     import doctest

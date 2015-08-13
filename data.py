@@ -4,14 +4,11 @@ import sys, re, json, string
 
 import nltk
 from codecs import open
-from guess_language import guessLanguage
 
 from util import (get_file_names, 
                   extract_title, 
                   get_document_content_paf,
-                  get_document_content, 
-                  is_monocase, 
-                  normalize_title)
+                  get_document_content)
 
 from cap_transform import (make_capitalized_title,
                            make_lowercase_title,
@@ -22,23 +19,8 @@ from word_shape_util import (without_alpha,
                              contains_uppercase)
 
 from capitalization_restoration.feature_extractor import FeatureExtractor
-
-def print_filenames_and_titles():
-    """print title each per one line from the corpus"""
-    paths = ['/group/home/puls/Shared/capitalization-recovery/%2d' %i 
-             for i in xrange(9, 32)]    
-    titles = []
-    for fname in get_file_names(paths):
-        title = extract_title(fname)
-        
-        if not title: # no title
-            continue
-            
-        title = normalize_title(title)
-        
-        if not is_monocase(nltk.word_tokenize(title)) and guessLanguage(title) == "en": #is not monocase and is English
-            print json.dumps([fname, unicode(title).encode("utf8")])
     
+
 def get_label(word, **kwargs):
     """
     Possible labels
@@ -109,7 +91,8 @@ def get_label(word, **kwargs):
         return "I"
         # raise ValueError("Invalid value `%s`" %(word))
 
-def convert_to_trainable_format(raw_title, title_transform_func, feature_extractor, docpath = None):
+
+def convert_to_trainable_format(title, title_transform_func, feature_extractor, **kwargs):
     """
     Given some title(before capitalization), return the trainable(for CRF-suite) format
     
@@ -124,14 +107,12 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
     >>> sent[1]["y"]
     'AL'
     """
-    words = nltk.word_tokenize(raw_title)
+    if isinstance(title, list):
+        words = title
+    else:
+        words = nltk.word_tokenize(title)
 
     transformed_words = title_transform_func(title_words = words)
-
-    kwargs={}
-
-    if docpath:
-        kwargs['docpath']=docpath
 
     words_with_features = feature_extractor.extract(transformed_words, **kwargs)
 
@@ -141,7 +122,8 @@ def convert_to_trainable_format(raw_title, title_transform_func, feature_extract
 
     return words_with_features
 
-def print_trainable_data(path, 
+
+def print_trainable_data(path,
                          extractor, feature_names,
                          start, end = None,
                          title_transform_func = make_capitalized_title):

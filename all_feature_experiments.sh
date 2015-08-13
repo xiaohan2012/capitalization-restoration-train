@@ -1,5 +1,7 @@
-modes=(upper lower cap)
-feature_groups=(1 2 3 4 5 6 1+2 1+3 1+4 1+5 1+6 1+2+3+4+5+6)
+# modes=(upper lower cap)
+modes=(cap)
+# feature_groups=(1 2 3 4 5 6 1+2 1+3 1+4 1+5 1+6 1+2+3+4+5+6)
+feature_groups=(1+2+3+4+5+6)
 size=30000
 
 DATA_ROOT="/cs/taatto/home/hxiao/capitalization-recovery/corpus"

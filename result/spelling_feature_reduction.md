@@ -11,14 +11,13 @@ Subset accuracy: 95.18
          IC     0.9296    0.8705    0.8991     13889
          MX     0.9007    0.5567    0.6881       864
 
-```
-
 avg / total     0.9512    0.9518    0.9506     61025
 
 Precision/Recall/F1(macro) : 0.9534  0.8812  0.9089
 
 Precision/Recall/F1(micro) : 0.9518  0.9518  0.9518
 
+```
 # Without 1 'begins-with-alphabetic'
 
 Subset accuracy: 95.10

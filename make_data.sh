@@ -1,10 +1,11 @@
 #! /bin/bash
 
-ops=(lower upper cap)
-sizes=(5000 10000 15000 20000 25000 30000)
+# ops=(lower upper cap)
+ops=(cap)
+# sizes=(5000 10000 15000 20000 25000 30000)
 
 # ops=(upper)
-# sizes=(30000)
+sizes=(30000)
 
 for size in "${sizes[@]}"
 do
@@ -19,6 +20,9 @@ do
 		home_test_path=corpus/news_title_$op/$size/test.txt
 		dest_train_path=/cs/taatto/home/hxiao/capitalization-recovery/$home_train_path
 		dest_test_path=/cs/taatto/home/hxiao/capitalization-recovery/$home_test_path
+
+		echo -e "Output to: ${dest_train_path}\n${dest_test}"
+
 		python data.py fnames_and_titles.txt $op 0 $size > $home_train_path
 		python data.py fnames_and_titles.txt $op 30001  > $home_test_path
 

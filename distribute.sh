@@ -3,10 +3,10 @@
 
 cmd_file=$1
 
-if [ -z "$cmd_file" ]; then
-	echo "cmd file should be given"
-	exit -1
-fi
+# if [ -z "$cmd_file" ]; then
+# 	echo "cmd file should be given"
+# 	exit -1
+# fi
 
 servers=$(<servers.lst)
 echo "SERVERS TO DEPLOY: "

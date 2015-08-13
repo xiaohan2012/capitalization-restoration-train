@@ -1,15 +1,23 @@
 import json
 import os
-
+import codecs
 from capitalization_train.puls_util import (separate_title_from_body,
-                                            extract_and_capitalize_headlines_from_corpus)
+                                            extract_and_capitalize_headlines_from_corpus,
+                                            get_input_example)
 from nose.tools import assert_equal
 
 
 CURDIR = os.path.dirname(os.path.realpath(__file__))
 
 
-title_sent = '{"sentno":0,"start":51,"end":128,"features":[{"lemma":"nanobiotix","pos":"name_oov","token":"Nanobiotix"},{"lemma":"get","pos":"tv","token":"gets"},{"lemma":"early","pos":"d","token":"early"},{"lemma":"positive","pos":"adj","token":"Positive"},{"lemma":"safety","pos":"n","token":"Safety"},{"lemma":"result","pos":"n","token":"rEsults"},{"lemma":"in","pos":"csn","token":"IN"},{"lemma":"head","pos":"n","token":"head"},{"lemma":"","pos":null,"token":"and"},{"lemma":"neck","pos":"n","token":"neck"},{"lemma":"clinical","pos":"adj","token":"clinical"},{"lemma":"trial","pos":"n","token":"trial"}]}'
+with codecs.open(CURDIR + '/data/001BBB8BFFE6841FA498FCE88C43B63A.title.json') as f:
+    title_sent = json.loads(f.read())
+
+with codecs.open(CURDIR + '/data/001BBB8BFFE6841FA498FCE88C43B63A.title-cap.json') as f:
+    cap_title_sent = json.loads(f.read())
+
+with codecs.open(CURDIR + '/data/001BBB8BFFE6841FA498FCE88C43B63A.body.json') as f:
+    body_sents = json.loads(f.read())
 
 
 def test_separate_title_from_body():
@@ -18,10 +26,11 @@ def test_separate_title_from_body():
                                                        rawpath + ".paf")
     assert_equal(len(title_sents), 1)
     assert_equal(len(body_sents), 20)
-    assert_equal(title_sents[0], json.loads(title_sent))
+    assert_equal(title_sents[0], title_sent)
 
 
 def test_extract_and_capitalize_headlines_from_corpus():
+    doc_id
     corpus_dir = '/cs/fs/home/hxiao/code/capitalization_train/test_data/puls_format_raw/'
     result = list(extract_and_capitalize_headlines_from_corpus(corpus_dir))
     assert_equal(len(result), 100)
@@ -36,3 +45,15 @@ def test_extract_and_capitalize_headlines_from_corpus():
                      result)[0]
     
     assert_equal(len(result1[1]), 2)
+
+
+def test_input_example():
+    actual = get_input_example(
+        CURDIR + '/data/docs_okformed/',
+        CURDIR + '/data/docs_malformed/',
+        '001BBB8BFFE6841FA498FCE88C43B63A'
+    )
+    expected = {"capitalizedSentences": [cap_title_sent],
+                "otherSentences": body_sents}
+
+    assert_equal(actual, expected)

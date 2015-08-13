@@ -22,9 +22,9 @@ from unigram import UnigramLabeler
 from error_display import print_label_error
 
 # turn this ON when you want to rebuild the data matrices
-LOAD_FROM_CACHE = 1
-RETRAIN_MODEL = 0
-ERROR_REPORT = 1
+LOAD_FROM_CACHE = 0
+RETRAIN_MODEL = 1
+ERROR_REPORT = 0
 
 # Data preparation
 
@@ -175,13 +175,13 @@ if ERROR_REPORT:
                           dict_vect=dict_vect,
                           label_encoder=label_encoder)
 
-    print "Confusion matrix:"
-    table = pds.DataFrame(confusion_matrix(list(chain.from_iterable(test_y)),
-                                           list(chain.from_iterable(pred_y)),
-                                           labels=labels),
-                          index=map(lambda s: '{}_true'.format(s), labels),
-                          columns=map(lambda s: '{}_pred'.format(s), labels))
-    print table
+print "Confusion matrix:"
+table = pds.DataFrame(confusion_matrix(list(chain.from_iterable(test_y)),
+                                       list(chain.from_iterable(pred_y)),
+                                       labels=labels),
+                      index=map(lambda s: '{}_true'.format(s), labels),
+                      columns=map(lambda s: '{}_pred'.format(s), labels))
+print table
 
 
     

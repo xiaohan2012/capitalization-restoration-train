@@ -12,8 +12,8 @@ if [ ! -f $1 ] || [ -z $1 ]; then
 	exit -1
 fi
 
-# DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
-DOC_DIR=/cs/fs/home/hxiao/code/capitalization-restoring/test_data/puls_format_raw/
+# DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/
+DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
 
 
 while read docid; do

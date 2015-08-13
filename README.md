@@ -1,4 +1,4 @@
-# Usage
+># Usage
 
 ## Train the model
 
@@ -60,3 +60,12 @@ The `pred_err.py` util will print out the error examples as well as confusion ma
 
 
 
+## How to produce new data set
+
+1. `python print_filenames_and_titles.py`: get the file paths and news titles
+2. `python copy_puls_file_to_local.py`: copy the files somewhere writable
+3. `python extract_doc_ids.py`: for `puls_process` script
+4. `puls-core-process-document.sh`: on the doc_ids file
+4. `process_and_save_capitalized_headlines.py`: save the malformed headlines somwhere
+5. `make_data_puls.py`: extract the features
+6. `train_puls_model.sh`: train the model

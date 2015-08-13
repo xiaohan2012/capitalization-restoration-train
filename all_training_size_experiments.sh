@@ -1,6 +1,7 @@
 modes=(upper lower cap)
 features=1+2+3+4+5+6
-sizes=(5000 10000 15000 20000 25000 30000)
+# sizes=(5000 10000 15000 20000 25000 30000)
+sizes=(30000)
 
 DATA_ROOT="/cs/taatto/home/hxiao/capitalization-recovery/corpus"
 

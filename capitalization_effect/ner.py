@@ -22,7 +22,7 @@ def transform_labels(labels, mapping = MAPPING):
 TEST_DATA_PATH="/cs/taatto/home/hxiao/capitalization-recovery/corpus/conll2003/eng.testa"
 
 
-def main(word_transformation = None, result_path = None, n = 500):
+def main(word_transformation = None, result_path = None, n = 50):
     tagged_corpus = CoNLLNERReader(TEST_DATA_PATH).read()[:n]
     
     tagger = NERTagger('/cs/fs/home/hxiao/code/stanford-ner-2015-01-30/classifiers/english.conll.4class.distsim.crf.ser.gz',

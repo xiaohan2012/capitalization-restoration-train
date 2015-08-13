@@ -33,7 +33,7 @@ def separate_title_from_body(aux_file_path,
         return title_sents, body_sents
 
 
-def extract_and_capitalize_headlines_from_corpus(corpus_dir):
+def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
     """
     Iterate through all the files in `corpus_dir`,
     extract the headlines, capitalized and return them
@@ -41,6 +41,9 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir):
     Parameter:
     ---------------
     corpus_dir: string
+
+    docids: list of string
+        the document to be processed
 
     Return:
     --------------
@@ -73,3 +76,17 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir):
                        list(map(compose(make_capitalized_title_new,
                                         get_tokens, get_features),
                                 titles)))
+
+
+def get_input_example(okform_dir, malformed_dir, id_):
+    cap_title_path = str(Path(malformed_dir) / Path(id_)) + '.auxil'
+    doc_path = str(Path(okform_dir) / Path(id_))
+    
+    _, docs = separate_title_from_body(doc_path + '.auxil',
+                                       doc_path + '.paf')
+    
+    with codecs.open(cap_title_path, 'r', 'utf8') as f:
+        title = json.loads(f.read())
+
+    return {'capitalizedSentences': [title],
+            'otherSentences': docs}
