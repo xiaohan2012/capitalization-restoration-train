@@ -1,24 +1,24 @@
-from capitalization_train.puls_util import (get_title_from_puls_core_output,
+import json
+import os
+
+from capitalization_train.puls_util import (separate_title_from_body,
                                             extract_and_capitalize_headlines_from_corpus)
 from nose.tools import assert_equal
 
 
-def test_multiple_titles():
-    rawpath = '/cs/fs/home/hxiao/code/capitalization_train/test_data/puls_format_raw/4271571E96D5C726ECFDDDAACA74A264'
-    titles = get_title_from_puls_core_output(rawpath + ".auxil",
-                                             rawpath + ".paf",
-                                             rawpath)
-
-    assert_equal(len(list(titles)), 2)
+CURDIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def test_single_title():
-    rawpath = '/cs/fs/home/hxiao/code/capitalization_train/test_data/puls_format_raw/001BBB8BFFE6841FA498FCE88C43B63A'
-    titles = get_title_from_puls_core_output(rawpath + ".auxil",
-                                             rawpath + ".paf",
-                                             rawpath)
+title_sent = '{"sentno":0,"start":51,"end":128,"features":[{"lemma":"nanobiotix","pos":"name_oov","token":"Nanobiotix"},{"lemma":"get","pos":"tv","token":"gets"},{"lemma":"early","pos":"d","token":"early"},{"lemma":"positive","pos":"adj","token":"Positive"},{"lemma":"safety","pos":"n","token":"Safety"},{"lemma":"result","pos":"n","token":"rEsults"},{"lemma":"in","pos":"csn","token":"IN"},{"lemma":"head","pos":"n","token":"head"},{"lemma":"","pos":null,"token":"and"},{"lemma":"neck","pos":"n","token":"neck"},{"lemma":"clinical","pos":"adj","token":"clinical"},{"lemma":"trial","pos":"n","token":"trial"}]}'
 
-    assert_equal(len(list(titles)), 1)
+
+def test_separate_title_from_body():
+    rawpath = CURDIR + '/data/docs_okformed/001BBB8BFFE6841FA498FCE88C43B63A'
+    title_sents, body_sents = separate_title_from_body(rawpath + ".auxil",
+                                                       rawpath + ".paf")
+    assert_equal(len(title_sents), 1)
+    assert_equal(len(body_sents), 20)
+    assert_equal(title_sents[0], json.loads(title_sent))
 
 
 def test_extract_and_capitalize_headlines_from_corpus():

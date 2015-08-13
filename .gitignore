@@ -57,7 +57,7 @@ target/
 
 crfsuite-0.12/
 cv_scripts/
-data/
+# data/
 deploy_scripts/
 tmp/
 models/

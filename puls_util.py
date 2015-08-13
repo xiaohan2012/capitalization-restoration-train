@@ -6,26 +6,31 @@ from pathlib import Path
 
 from toolz.dicttoolz import get_in
 from toolz.functoolz import compose
-from toolz import (partial, map, filter)
+from toolz import (partial, map)
 
 from util import get_title_position
 from cap_transform import make_capitalized_title
 
 
-def get_title_from_puls_core_output(aux_file_path,
-                                    paf_file_path,
-                                    main_file_path):
+def separate_title_from_body(aux_file_path,
+                             paf_file_path):
     """
     """
-    with codecs.open(aux_file_path, 'r', 'utf8') as aux_f, \
-         codecs.open(main_file_path, 'r', 'utf8') as main_f:
+    with codecs.open(aux_file_path, 'r', 'utf8') as aux_f:
         start, end = get_title_position(paf_file_path)
         data = json.loads(aux_f.read())
 
         within_range = (lambda sent:
                         sent['start'] >= start and sent['end'] <= end)
 
-        return filter(within_range, data['sents'])
+        title_sents = []
+        body_sents = []
+        for sent in data['sents']:
+            if within_range(sent):
+                title_sents.append(sent)
+            else:
+                body_sents.append(sent)
+        return title_sents, body_sents
 
 
 def extract_and_capitalize_headlines_from_corpus(corpus_dir):
@@ -53,11 +58,10 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir):
             paf_p = p.with_suffix('.paf')
             if auxil_p.exists() and paf_p.exists():
                 try:
-                    titles = get_title_from_puls_core_output(
+                    titles, _ = separate_title_from_body(
                         str(auxil_p),
-                        str(paf_p),
-                        str(p))
-                except ValueError:  # some .auxil is empty
+                        str(paf_p))
+                except:  # some .auxil is empty
                     print "DOCID: {}".format(p)
                     print(traceback.format_exc())
 
