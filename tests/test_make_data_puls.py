@@ -31,11 +31,13 @@ sent1_json = [{u'lemma': u'nanobiotix',
               {u'lemma': u'trial', u'pos': u'n', u'token': u'trial'}]
 
 
+malform_data_dir = CURDIR + '/data/docs_malformed/'
+okform_data_dir = CURDIR + '/data/docs_okformed/'
+
+
 def test_print_trainable_data():
     ids = ['001BBB8BFFE6841FA498FCE88C43B63A',
            '4B4DE4C180DB7697035273DB90BF5101']
-    malform_data_dir = CURDIR + '/data/docs_malformed/'
-    okform_data_dir = CURDIR + '/data/docs_okformed/'
     res = printable_train_data(malform_data_dir=malform_data_dir,
                                okform_data_dir=okform_data_dir,
                                ids=ids,
@@ -53,7 +55,7 @@ safety n IC
 result n MX
 in csn AU
 head n AL
---EMPTY-- None AL
+and None AL
 neck n AL
 clinical adj AL
 trial n AL
@@ -61,3 +63,5 @@ trial n AL
     assert_equal(sent1, expected1)
 
     assert_equal(len(list(res)), 1)  # 2 sentences in total
+
+

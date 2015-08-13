@@ -12,7 +12,10 @@ from guess_language import guessLanguage
 def main():
     """print title each per one line from the corpus"""
     
-    months = ['04', '05']
+    # months = ['04', '05'], 2015-08-05
+    # months = ['02'] # 2015-08-13
+    months = ['03']  # 2015-08-13
+    
     days = xrange(1, 32)
     paths = ['/cs/puls/Corpus/Business/Puls/2015/{}/{:2d}/'.format(month, day)
              for month in months

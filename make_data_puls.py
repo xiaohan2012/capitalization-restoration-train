@@ -6,9 +6,11 @@ from toolz.dicttoolz import get_in
 from toolz.functoolz import (partial, compose)
 
 from capitalization_restoration.feature_extractor import FeatureExtractor
-from puls_util import get_title_from_puls_core_output
+from puls_util import separate_title_from_body
 from data import convert_to_trainable_format
 from cap_transform import make_capitalized_title
+
+from errors import TitleInconsistencyError
 
 
 def printable_train_data(malform_data_dir,
@@ -56,9 +58,7 @@ def printable_train_data(malform_data_dir,
     get_tokens = partial(map, partial(get_in, ['token']))
     get_tags = partial(map, compose(clean_tag,
                                     partial(get_in, ['pos'])))
-    clean_lemma = (lambda t: '--EMPTY--' if len(t) == 0 else t)
-    get_lemmas = partial(map, compose(clean_lemma,
-                                      partial(get_in, ['lemma'])))
+    get_lemmas = partial(map, partial(get_in, ['lemma']))
 
     n_collected = 0
 
@@ -81,13 +81,11 @@ def printable_train_data(malform_data_dir,
                 for l in f:
                     pass
 
-                docpath = str(okform_data_dir / Path(id_))
-
                 try:
                     data = json.loads(l.strip())
                 except ValueError:
-                    sys.stderr.write('JSON parse error: {}\n'.format(l))
-                    sys.stderr.write(traceback.format_exc())
+                    # sys.stderr.write('JSON parse error: {}\n'.format(l))
+                    # sys.stderr.write(traceback.format_exc())
                     continue
                     
                 okform_auxil_path = str((okform_data_dir /
@@ -95,43 +93,57 @@ def printable_train_data(malform_data_dir,
                 okform_paf_path = str((okform_data_dir /
                                        Path(id_)).with_suffix('.paf'))
                 try:
-                    normal_case_titles = get_title_from_puls_core_output(
+                    ok_title_sents, body_sents = separate_title_from_body(
                         okform_auxil_path,
                         okform_paf_path
                     )
                 except (TypeError, IOError, ValueError):
-                    sys.stderr.write(traceback.format_exc())
+                    # sys.stderr.write(traceback.format_exc())
                     continue
-                normal_case_titles = list(normal_case_titles)
 
-                if not isinstance(data['sents'], list):
-                    sys.stderr.write('No headline available\n')
+                # extract the tokens
+                doc = [[t['token'] for t in sent['features']]
+                       for sent in body_sents]
+
+                ok_title_sents = list(ok_title_sents)
+
+                bad_title_sents = data['sents']
+                if not isinstance(bad_title_sents, list):
+                    # sys.stderr.write('No headline available\n')
                     continue
 
                 # we only consider headline that contains only ONE sentence
-                if not (len(normal_case_titles) == 1 and
-                        len(data['sents']) == 1):
-                    sys.stderr.write('Sentence segmentation inconsistent:\n')
+                if not (len(ok_title_sents) == 1 and
+                        len(bad_title_sents) == 1):
+                    # sys.stderr.write('Sentence segmentation inconsistent:\n')
                     sents_str = lambda sents: '\n'.join(
                         [' '.join(get_tokens(sent['features']))
                          for sent in sents]
                     )
-                    sys.stderr.write('Good:\n' + sents_str(normal_case_titles))
-                    sys.stderr.write('Bad:\n' + sents_str(data['sents']))
+                    # sys.stderr.write('Good:\n' + sents_str(ok_title_sents)
+                    #                  + '\n')
+                    # sys.stderr.write('Bad:\n' + sents_str(bad_title_sents)
+                    #                  + '\n')
                     continue
 
                 try:
                     good_sent, bad_sent\
-                        = normal_case_titles[0], data['sents'][0]
+                        = ok_title_sents[0], bad_title_sents[0]
 
                     good_title_tokens = get_tokens(good_sent['features'])
                     bad_title_tokens = get_tokens(bad_sent['features'])
 
                     # some validity checking
-                    assert len(good_title_tokens) == len(bad_title_tokens)
+                    if len(good_title_tokens) != len(bad_title_tokens):
+                        raise TitleInconsistencyError
+
                     for good_token, bad_token in zip(good_title_tokens,
                                                      bad_title_tokens):
-                        assert good_token.lower() == bad_token.lower()
+                        if good_token.lower() != bad_token.lower():
+                            err_msg = 'Sentence content inconsistent:\n' + \
+                                      'Good:' + json.dumps(good_title_tokens) + \
+                                      '\nBad:' + json.dumps(bad_title_tokens) + '\n'
+                            raise TitleInconsistencyError(err_msg)
 
                     tags = get_tags(bad_sent['features'])
                     lemmas = get_lemmas(bad_sent['features'])
@@ -149,20 +161,16 @@ def printable_train_data(malform_data_dir,
                         good_title_tokens,
                         title_transform_func,
                         extractor,
-                        docpath=docpath,
+                        doc=doc,
                         pos=tags,
                         lemma=lemmas
                     )
-                except AssertionError:
-                    sys.stderr.write('Sentence content inconsistent:\n')
-                    sys.stderr.write('Good:' + json.dumps(good_title_tokens)
-                                     + '\n')
-                    sys.stderr.write('Bad:' + json.dumps(bad_title_tokens)
-                                     + '\n')
+                except (TitleInconsistencyError, ValueError):
                     continue
                 except:
-                    sys.stderr.write(json.dumps(data) + '\n')
-                    sys.stderr.write(traceback.format_exc())
+                    # sys.stderr.write("{}:\n".format(id_))
+                    # sys.stderr.write(json.dumps(data) + '\n')
+                    # sys.stderr.write(traceback.format_exc())
                     continue
 
                 # format the features in the required form
@@ -175,10 +183,10 @@ def printable_train_data(malform_data_dir,
                 n_collected += 1
                 yield res
         except IOError:
-            sys.stderr.write('IOError: {}/{}.auxil\n'.format(
-                str(malform_data_dir), id_)
-            )
-            sys.stderr.write(traceback.format_exc())
+            # sys.stderr.write('IOError: {}/{}.auxil\n'.format(
+            #     str(malform_data_dir), id_)
+            # )
+            # sys.stderr.write(traceback.format_exc())
 
             continue
             
