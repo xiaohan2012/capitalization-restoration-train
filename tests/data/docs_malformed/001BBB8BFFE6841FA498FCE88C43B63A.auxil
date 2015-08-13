@@ -1,0 +1,8 @@
+# __________________________________________
+0	0	Doc	DocID	NIL	sents	1	pars	0	comps	0
+
+
+0	77	s	sentno	0
+
+
+{"sents":1,"pars":0,"comps":0,"entities":[{"type":"name","offsets":[{"start":0,"end":10}],"canonName":"Nanobiotix"}],"sents":[{"sentno":0,"start":0,"end":77,"features":[{"lemma":"nanobiotix","pos":"name_oov","token":"Nanobiotix"},{"lemma":"get","pos":"tv","token":"Gets"},{"lemma":"early","pos":"d","token":"Early"},{"lemma":"positive","pos":"adj","token":"Positive"},{"lemma":"safety","pos":"n","token":"Safety"},{"lemma":"result","pos":"n","token":"Results"},{"lemma":"in","pos":"csn","token":"in"},{"lemma":"head","pos":"n","token":"Head"},{"lemma":"","pos":null,"token":"and"},{"lemma":"neck","pos":"n","token":"Neck"},{"lemma":"clinical","pos":"adj","token":"Clinical"},{"lemma":"trial","pos":"n","token":"Trial"}]}]}
