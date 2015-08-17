@@ -14,7 +14,7 @@ from capitalization_restoration.feature_extractor import DEFAULT_FEATURES
 
 
 # Separator of field values.
-separator = ' '
+separator = '\t'
 
 id2feature = {
     1: lexical_features,

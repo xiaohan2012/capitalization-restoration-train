@@ -168,15 +168,15 @@ def printable_train_data(malform_data_dir,
                 except (TitleInconsistencyError, ValueError):
                     continue
                 except:
-                    # sys.stderr.write("{}:\n".format(id_))
-                    # sys.stderr.write(json.dumps(data) + '\n')
-                    # sys.stderr.write(traceback.format_exc())
+                    sys.stderr.write("{}:\n".format(id_))
+                    sys.stderr.write(json.dumps(data) + '\n')
+                    sys.stderr.write(traceback.format_exc())
                     continue
 
                 # format the features in the required form
                 res = unicode()
                 for word in words:
-                    word_feature_str = u' '.join(
+                    word_feature_str = u'\t'.join(
                         [unicode(word[feature_name])
                          for feature_name in feature_names])
                     res += word_feature_str + '\n'
