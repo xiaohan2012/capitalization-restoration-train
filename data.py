@@ -89,7 +89,7 @@ def print_trainable_data(path,
 
             # print the features in the required format
             for word in words:
-                word_feature_str = ' '.join([unicode(word[feature_name]) for feature_name in feature_names])
+                word_feature_str = '\t'.join([unicode(word[feature_name]) for feature_name in feature_names])
                 print unicode(word_feature_str).encode('utf8')
             print 
             

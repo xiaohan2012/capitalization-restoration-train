@@ -37,13 +37,3 @@ def get_label(word, **kwargs):
                 return "AL"
             else:
                 return "AU"
-                
-    if word.upper() == word:
-        return "AU"
-    elif word[0].isalpha() and word[0] == word[0].upper():
-        return "C"
-    elif word[0].isalpha():
-        return "L"
-    else:
-        return "I"
-        # raise ValueError("Invalid value `%s`" %(word))

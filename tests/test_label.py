@@ -20,7 +20,8 @@ def test_get_label():
     assert_equal(get_label(u'/hone/Doc'), 'MX')
     assert_equal(get_label(u'HealthCare'), 'MX')
     assert_equal(get_label(u'SaaS'), 'MX')
-    assert_equal(get_label(u'ealthCare'), 'MX')
+    assert_equal(get_label(u'healthCare'), 'MX')
+    assert_equal(get_label(u'iPhone'), 'MX')
     assert_equal(get_label(u'11.5Aa'), 'MX')
 
     assert_equal(get_label(u'$123'), 'AN')

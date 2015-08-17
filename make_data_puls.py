@@ -12,6 +12,11 @@ from cap_transform import make_capitalized_title
 
 from errors import TitleInconsistencyError
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 def printable_train_data(malform_data_dir,
                          okform_data_dir,
@@ -181,7 +186,7 @@ def printable_train_data(malform_data_dir,
                          for feature_name in feature_names])
                     res += word_feature_str + '\n'
                 n_collected += 1
-                yield res
+                yield id_, res
         except IOError:
             # sys.stderr.write('IOError: {}/{}.auxil\n'.format(
             #     str(malform_data_dir), id_)
@@ -205,11 +210,15 @@ if __name__ == '__main__':
     except IndexError:
         end = None
 
-    for l in printable_train_data(malform_data_dir,
+    successful_ids = []
+    for id_, l in printable_train_data(malform_data_dir,
                                   okform_data_dir,
                                   ids,
                                   extractor=extractor,
                                   feature_names=extractor.feature_names,
                                   start=start, end=end,
                                   title_transform_func=make_capitalized_title):
+        successful_ids.append(id_)
         print l.encode('utf8')
+    logger.info("{}".format(successful_ids))
+

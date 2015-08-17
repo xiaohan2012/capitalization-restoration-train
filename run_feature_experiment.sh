@@ -17,9 +17,8 @@ cd ~/code/capitalization_train/
 cat $train_path | python crfsuite-0.12/example/chunking.py $feature_ids > $my_dir/train.crfsuite.txt
 cat $test_path | python crfsuite-0.12/example/chunking.py $feature_ids > $my_dir/test.crfsuite.txt
 
-# ./crfsuite-0.12/bin/crfsuite learn -m $my_dir/model $my_dir/train.crfsuite.txt
-
-# ./crfsuite-0.12/bin/crfsuite tag -qt -m $my_dir/model $my_dir/test.crfsuite.txt > $my_dir/result.txt
+./crfsuite-0.12/bin/crfsuite learn -m $my_dir/model $my_dir/train.crfsuite.txt
+./crfsuite-0.12/bin/crfsuite tag -qt -m $my_dir/model $my_dir/test.crfsuite.txt > $my_dir/result.txt
 
 # remove train data to save space
 # rm $my_dir/train.crfsuite.txt 

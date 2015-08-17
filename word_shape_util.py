@@ -1,6 +1,8 @@
 import re
 
 contain_alpha_regexp = re.compile(r'[a-zA-Z]')
+
+
 def without_alpha(s):
     """
     check if the string contains alphabetic value or not
@@ -15,6 +17,8 @@ def without_alpha(s):
     return contain_alpha_regexp.search(s) is None
 
 contain_lower_regexp = re.compile(r'[a-z]')
+
+
 def contains_lowercase(s):
     """
     check if the string contains lowercase character or not
@@ -28,8 +32,10 @@ def contains_lowercase(s):
     """
     return contain_lower_regexp.search(s) is not None
 
+
 contain_upper_regexp = re.compile(r'[A-Z]')
-    
+
+
 def contains_uppercase(s):
     """
     check if the string contains uppercase character or not
