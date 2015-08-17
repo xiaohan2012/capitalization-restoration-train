@@ -1,4 +1,4 @@
-from capitalization_train.data import get_label
+from capitalization_train.label import get_label
 
 from nose.tools import assert_equal
 

@@ -6,7 +6,7 @@ import nltk
 from codecs import open
 
 from util import (get_file_names, 
-                  extract_title, 
+                  extract_title,
                   get_document_content_paf,
                   get_document_content)
 
@@ -14,55 +14,9 @@ from cap_transform import (make_capitalized_title,
                            make_lowercase_title,
                            make_uppercase_title)
 
-from word_shape_util import (without_alpha, 
-                             contains_lowercase, 
-                             contains_uppercase)
-
 from capitalization_restoration.feature_extractor import FeatureExtractor
     
-
-def get_label(word, **kwargs):
-    """
-    Possible labels
-    
-    IC: initial capital, note, there should be at least one alphabetic letter, and the alphabetic ones are in lower case 
-    AU: all uppercase
-    AL: all lowercase
-    MX: mixed case
-    AN: all no case
-    """
-    if without_alpha(word):
-        return "AN"
-    else:
-        if word[0].isalpha(): # starts with alpha
-            # a word
-            if word.lower() == word:
-                return "AL"
-            elif word[0].upper() == word[0] and contains_lowercase(word) and word[1:].lower() == word[1:]:
-                return "IC"
-            elif word.upper() == word:
-                return "AU"
-            else:
-                return "MX"
-        else:
-            lower_flag = contains_lowercase(word)
-            upper_flag = contains_uppercase(word)
-            if lower_flag and upper_flag:
-                return "MX"
-            elif lower_flag and not upper_flag:
-                return "AL"
-            else:
-                return "AU"
-                
-    if word.upper() == word:
-        return "AU"
-    elif word[0].isalpha() and word[0] == word[0].upper():
-        return "C"
-    elif word[0].isalpha():
-        return "L"
-    else:
-        return "I"
-        # raise ValueError("Invalid value `%s`" %(word))
+from label import get_label
 
 
 def convert_to_trainable_format(title, title_transform_func, feature_extractor, **kwargs):
