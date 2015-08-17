@@ -59,7 +59,6 @@ The `pred_err.py` util will print out the error examples as well as confusion ma
 - 
 
 
-
 ## How to produce new data set
 
 1. `python print_filenames_and_titles.py`: get the file paths and news titles
@@ -69,3 +68,11 @@ The `pred_err.py` util will print out the error examples as well as confusion ma
 4. `process_and_save_capitalized_headlines.py`: save the malformed headlines somwhere
 5. `make_data_puls.py`: extract the features
 6. `train_puls_model.sh`: train the model
+
+
+## Preparing general format data
+
+1. Make sure that the auxil file + paf file about the correct title is there
+3. Make sure that malformed titles(tokenized) are stored in the raw files
+2. Get the doc ids by running `make_puls_data.sh` and the ids are in the `data` dir
+4. Call `output_labels` in `rule_based.py` to save the labels
