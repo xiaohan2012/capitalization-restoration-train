@@ -1,5 +1,6 @@
 import sys
 import json
+import time
 import traceback
 from pathlib import Path
 from toolz.dicttoolz import get_in
@@ -220,5 +221,11 @@ if __name__ == '__main__':
                                   title_transform_func=make_capitalized_title):
         successful_ids.append(id_)
         print l.encode('utf8')
-    logger.info("{}".format(successful_ids))
+
+    with open('data/trainable_doc_ids_{}.txt'.format(
+            time.strftime("%Y-%m-%d_%H:%M")),
+            'w') as f:
+        for i in successful_ids:
+            f.write("{}\n".format(i))
+
 
