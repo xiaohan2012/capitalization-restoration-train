@@ -30,33 +30,6 @@ def get_label(word, **kwargs):
     AL: all lowercase
     MX: mixed case
     AN: all no case
-
-    >>> get_label(u'Click')
-    'IC'
-    >>> get_label(u'F11')
-    'AU'
-    >>> get_label(u'OK')
-    'AU'
-    >>> get_label(u'/hone/Doc')
-    'MX'
-    >>> get_label(u'HealthCare')
-    'MX'
-    >>> get_label(u'ealthCare')
-    'MX'
-    >>> get_label(u'lower')
-    'AL'
-    >>> get_label(u'$123')
-    'AN'
-    >>> get_label(u'.')
-    'AN'
-    >>> get_label(u'Fb11')
-    'IC'
-    >>> get_label(u'11.5a')
-    'AL'
-    >>> get_label(u'11.5A')
-    'AU'
-    >>> get_label(u'11.5Aa')
-    'MX'
     """
     if without_alpha(word):
         return "AN"
@@ -84,7 +57,7 @@ def get_label(word, **kwargs):
     if word.upper() == word:
         return "AU"
     elif word[0].isalpha() and word[0] == word[0].upper():
-        return "C" 
+        return "C"
     elif word[0].isalpha():
         return "L"
     else:
