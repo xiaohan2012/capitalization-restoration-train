@@ -163,7 +163,7 @@ def extract_title(path):
     with decode_open(path, "r", "utf8") as doc:
         #extract the content
         content = doc.read()
-        return "".join(content[start: end])    
+        return "".join(content[start: end])
 
 def get_reuter_file_paths(dirs = []):
     """
