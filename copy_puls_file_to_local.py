@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 
-def main(fname_and_tile_file_path, target_dir):
+def copy(fname_and_tile_file_path, target_dir):
     target_dir = Path(target_dir)
     if not target_dir.exists():
         target_dir.mkdir()
@@ -13,15 +13,20 @@ def main(fname_and_tile_file_path, target_dir):
         for l in global_f:
             path, title = json.loads(l.strip())
             
-            shutil.copy(path,
-                        str(target_dir / Path(path).name))
-            
-            shutil.copy(path + '.paf',
-                        str(target_dir / Path(Path(path).name + '.paf')))
+            target_path_text = target_dir / Path(path).name
+            if not target_path_text.exists():
+                shutil.copy(path,
+                            str(target_path_text))
+
+            target_path_paf = (target_dir /
+                               Path(Path(path).name).with_suffix('.paf'))
+            if not target_path_paf.exists():
+                shutil.copy(path + '.paf',
+                            str(target_path_paf))
 
 if __name__ == "__main__":
     import sys
     src_path = sys.argv[1]
     target_dir = sys.argv[2]
 
-    main(src_path, target_dir)
+    copy(src_path, target_dir)
