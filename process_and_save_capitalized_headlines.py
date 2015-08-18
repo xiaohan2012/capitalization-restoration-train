@@ -2,7 +2,7 @@ from pathlib import Path
 from puls_util import extract_and_capitalize_headlines_from_corpus
 
 import logging
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -11,13 +11,14 @@ def process_and_save(corpus_dir, target_dir, docids):
     target_dir = Path(target_dir)
     headlines = extract_and_capitalize_headlines_from_corpus(corpus_dir,
                                                              docids)
+
     for i, (e, res) in enumerate(headlines):
         if e:
             logging.error(e)
         else:
             (docid, headlines) = res
             if i % 100 == 0:
-                logging.info("{} / {} done".format(i, len(docids)))
+                logging.error("{} / {} done".format(i, len(docids)))
                     
             target_path = (target_dir / Path(docid))
                 

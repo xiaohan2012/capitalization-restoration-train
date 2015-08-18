@@ -1,4 +1,3 @@
-import sys
 import json
 import time
 import traceback
@@ -73,11 +72,11 @@ def printable_train_data(malform_data_dir,
             continue
             
         if i % 1000 == 0:
-            sys.stderr.write("Collected %d\n" % n_collected)
-            sys.stderr.write("Finished %d\n" % i)
+            logger.error("Collected %d" % n_collected)
+            logger.error("Finished %d" % i)
 
         if end is not None and i >= end:
-            sys.stderr.write("Reached %d.\nTerminate.\n" % end)
+            logger.error("Reached %d. Terminate." % end)
             break
 
         try:
@@ -90,8 +89,7 @@ def printable_train_data(malform_data_dir,
                 try:
                     data = json.loads(l.strip())
                 except ValueError:
-                    # sys.stderr.write('JSON parse error: {}\n'.format(l))
-                    # sys.stderr.write(traceback.format_exc())
+                    logger.debug('JSON parse error')
                     continue
                     
                 okform_auxil_path = str((okform_data_dir /
@@ -104,7 +102,7 @@ def printable_train_data(malform_data_dir,
                         okform_paf_path
                     )
                 except (TypeError, IOError, ValueError):
-                    # sys.stderr.write(traceback.format_exc())
+                    logger.debug(traceback.format_exc())
                     continue
 
                 # extract the tokens
@@ -115,99 +113,79 @@ def printable_train_data(malform_data_dir,
 
                 bad_title_sents = data['sents']
                 if not isinstance(bad_title_sents, list):
-                    # sys.stderr.write('No headline available\n')
+                    logger.debug('title sents not a list')
                     continue
 
                 # we only consider headline that contains only ONE sentence
-                if not (len(ok_title_sents) == 1 and
-                        len(bad_title_sents) == 1):
-                    # sys.stderr.write('Sentence segmentation inconsistent:\n')
-                    sents_str = lambda sents: '\n'.join(
-                        [' '.join(get_tokens(sent['features']))
-                         for sent in sents]
-                    )
-                    # sys.stderr.write('Good:\n' + sents_str(ok_title_sents)
-                    #                  + '\n')
-                    # sys.stderr.write('Bad:\n' + sents_str(bad_title_sents)
-                    #                  + '\n')
-                    continue
+                if (len(ok_title_sents) ==  1 and
+                    len(bad_title_sents) == 1):
+                    for good_sent, bad_sent in zip(ok_title_sents,
+                                                   bad_title_sents):
+                        try:
+                            good_title_tokens = get_tokens(good_sent['features'])
+                            bad_title_tokens = get_tokens(bad_sent['features'])
 
-                try:
-                    good_sent, bad_sent\
-                        = ok_title_sents[0], bad_title_sents[0]
+                            # some validity checking
+                            if len(good_title_tokens) != len(bad_title_tokens):
+                                raise TitleInconsistencyError
 
-                    good_title_tokens = get_tokens(good_sent['features'])
-                    bad_title_tokens = get_tokens(bad_sent['features'])
+                            if (map(lambda s: s.lower(), good_title_tokens) !=
+                                map(lambda s: s.lower(), bad_title_tokens)):
+                                    raise TitleInconsistencyError
 
-                    # some validity checking
-                    if len(good_title_tokens) != len(bad_title_tokens):
-                        raise TitleInconsistencyError
+                            tags = get_tags(bad_sent['features'])
+                            lemmas = get_lemmas(bad_sent['features'])
 
-                    for good_token, bad_token in zip(good_title_tokens,
-                                                     bad_title_tokens):
-                        if good_token.lower() != bad_token.lower():
-                            err_msg = 'Sentence content inconsistent:\n' + \
-                                      'Good:' + json.dumps(good_title_tokens) + \
-                                      '\nBad:' + json.dumps(bad_title_tokens) + '\n'
-                            raise TitleInconsistencyError(err_msg)
+                            # tag validity checking
+                            for tag in tags:
+                                if not (tag is None or
+                                        isinstance(tag, basestring)):
+                                    raise ValueError(
+                                        '{}: tag {} not string'.format(id_, tag)
+                                    )
 
-                    tags = get_tags(bad_sent['features'])
-                    lemmas = get_lemmas(bad_sent['features'])
-
-                    # tag validity checking
-                    for tag in tags:
-                        if not (tag is None or
-                                isinstance(tag, basestring)):
-                            raise ValueError(
-                                '{}: tag {} not string'.format(id_, tag)
+                            # get malformed title tokens
+                            words = convert_to_trainable_format(
+                                good_title_tokens,
+                                title_transform_func,
+                                extractor,
+                                doc=doc,
+                                pos=tags,
+                                lemma=lemmas
                             )
+                        except TitleInconsistencyError:
+                            logger.debug('TitleInconsistencyError')
+                            continue
+                        except:
+                            logger.debug(traceback.format_exc())
+                            continue
 
-                    # get malformed title tokens
-                    words = convert_to_trainable_format(
-                        good_title_tokens,
-                        title_transform_func,
-                        extractor,
-                        doc=doc,
-                        pos=tags,
-                        lemma=lemmas
-                    )
-                except (TitleInconsistencyError, ValueError):
-                    continue
-                except:
-                    sys.stderr.write("{}:\n".format(id_))
-                    sys.stderr.write(json.dumps(data) + '\n')
-                    sys.stderr.write(traceback.format_exc())
-                    continue
-
-                # format the features in the required form
-                res = unicode()
-                for word in words:
-                    word_feature_str = u'\t'.join(
-                        [unicode(word[feature_name])
-                         for feature_name in feature_names])
-                    res += word_feature_str + '\n'
-                n_collected += 1
-                yield id_, res
+                    # format the features in the required form
+                    res = unicode()
+                    for word in words:
+                        word_feature_str = u'\t'.join(
+                            [unicode(word[feature_name])
+                             for feature_name in feature_names])
+                        res += word_feature_str + '\n'
+                    n_collected += 1
+                    yield id_, res
         except IOError:
-            # sys.stderr.write('IOError: {}/{}.auxil\n'.format(
-            #     str(malform_data_dir), id_)
-            # )
-            # sys.stderr.write(traceback.format_exc())
-
+            logger.debug("{}.auxil file not found".format(id_))
             continue
             
 
 if __name__ == '__main__':
-    with open('data/doc_ids_2015_08_05.txt', 'r') as f:
-        ids = map(lambda s: s.strip(), f.readlines())
+    import sys
+    from puls_util import get_doc_ids_from_file
+    ids = get_doc_ids_from_file(sys.argv[1])
 
     malform_data_dir = '/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/'
     okform_data_dir = '/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format/'
     extractor = FeatureExtractor()
-    start = int(sys.argv[1])
+    start = int(sys.argv[2])
     
     try:
-        end = int(sys.argv[2])
+        end = int(sys.argv[3])
     except IndexError:
         end = None
 

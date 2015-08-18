@@ -3,13 +3,21 @@ from pathlib import Path
 from puls_util import (separate_title_from_body, get_doc_ids_from_file)
 from label import get_label
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 def output_labels(doc_ids, good_corpus_dir, bad_corpus_dir):
     """
     Output the correct labels of the given documents specified in doc_ids
     under bad_corpus_dir
     """
-    for doc_id in doc_ids:
+    for i, doc_id in enumerate(doc_ids):
+        if i % 1000 == 0:
+            logger.info("{} / {}".format(i, len(doc_ids)))
+
         label_path = bad_corpus_dir + '/{}.labels'.format(doc_id)
 
         # skip if there
@@ -21,12 +29,10 @@ def output_labels(doc_ids, good_corpus_dir, bad_corpus_dir):
             good_corpus_dir + '/{}.paf'.format(doc_id)
         )
         
-        assert len(titles) == 1
+        assert len(titles) == 1, (titles, doc_id)
         good_title = titles[0]
         labels = [get_label(w['token']) for w in good_title['features']]
 
-        print()
-        
         with open(label_path, 'w') as f:
             f.write(' '.join(labels))
         

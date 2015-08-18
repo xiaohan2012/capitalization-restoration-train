@@ -26,13 +26,12 @@ while read docid; do
 	doc_path="${DOC_DIR}/${docid}"
 	OP="(process-document \"${doc_path}\" :output-format 'JSON :train-capitalization t :suppress-trace t)"
 	if [ ! -f "${DOC_DIR}/${docid}.auxil" ]; then
+		echo "${doc_path}"
 		sbcl --core "$CORE" \
 			--noinform \
 			--no-userinit \
 			--disable-debugger \
 			--eval "$OP" \
 			--eval '(sb-ext:quit)'
-	else
-		echo "auxil exists"
 	fi
 done < $1
