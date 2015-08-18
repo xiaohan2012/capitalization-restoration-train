@@ -3,6 +3,11 @@ import json
 import shutil
 from pathlib import Path
 
+import logging
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s: %(message)s",
+                    datefmt="%Y-%m-%d %H:%M:%S")
+
 
 def copy(fname_and_tile_file_path, target_dir):
     target_dir = Path(target_dir)
@@ -12,7 +17,7 @@ def copy(fname_and_tile_file_path, target_dir):
     with codecs.open(fname_and_tile_file_path, 'r', 'utf8') as global_f:
         for i, l in enumerate(global_f):
             if i % 100 == 0:
-                print("{} finished".format(i))
+                logging.info("{} finished".format(i))
 
             path, title = json.loads(l.strip())
             
