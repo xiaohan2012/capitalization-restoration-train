@@ -4,7 +4,8 @@ import nltk
 from util import (get_file_names,
                   extract_title,
                   is_monocase,
-                  normalize_title)
+                  normalize_title,
+                  get_document_content_paf)
 
 from guess_language import guessLanguage
 
@@ -12,9 +13,10 @@ from guess_language import guessLanguage
 def main():
     """print title each per one line from the corpus"""
     
-    # months = ['04', '05'], 2015-08-05
+    months = ['02', '03', '04', '05']  # 2015-08-05
     # months = ['02'] # 2015-08-13
-    months = ['03']  # 2015-08-13
+    # months = ['02', '03', '04', '05'], 2015-08-05
+    # months = ['03']  # 2015-08-13
     
     days = xrange(1, 32)
     paths = ['/cs/puls/Corpus/Business/Puls/2015/{}/{:2d}/'.format(month, day)
@@ -36,7 +38,10 @@ def main():
         # is not monocase and is English
         if not is_monocase(nltk.word_tokenize(title)) and\
            guessLanguage(title) == "en":
-            print json.dumps([fname, unicode(title).encode("utf8")])
+            body = get_document_content_paf(fname)
+            if len(body.strip()) > 0:  # non-empty
+                print json.dumps([fname, unicode(title).encode("utf8")])
+
 
 if __name__ == "__main__":
     main()
