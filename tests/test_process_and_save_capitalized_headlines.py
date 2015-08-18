@@ -4,12 +4,12 @@ from capitalization_train.process_and_save_capitalized_headlines import process_
 from pathlib import Path
 
 CURDIR = os.path.dirname(os.path.realpath(__file__))
+target_dir = CURDIR + '/data/puls-format-raw-capitalized/'
 
 
 def test_process_and_save():
     # remove files first
     # while keeping one as 'already processed'
-    target_dir = CURDIR + '/data/puls-format-raw-capitalized/'
     fixed_doc_id = 'FB8778AEF476868557DDDDF98EF9D536'
     for p in Path(CURDIR + '/data/puls-format-raw-capitalized').iterdir():
         if p.name != fixed_doc_id:
