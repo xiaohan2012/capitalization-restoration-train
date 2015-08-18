@@ -21,7 +21,7 @@ from zipfile import ZipFile
 import json
 
 from ground_truth import (ARTICLES, PREPOSITIONS, CONJUNCTIONS)
-
+from label import get_label
 
 def get_file_names(paths=["/group/home/puls/Shared/capitalization-recovery/12"]):
     """
@@ -92,18 +92,23 @@ def is_monocase(title_words):
     >>> is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split()) # `van`
     True
     """
-    for word in title_words[1:]:
-        prefix = word.split("-")[0] #handle the in-Flight case
-        should_be_lower = lambda w: (w in ARTICLES or
-                                     w in PREPOSITIONS or
-                                     w in CONJUNCTIONS)
-
-        if should_be_lower(word) or should_be_lower(prefix):
-            continue
-        elif word[0].isalpha() and word[0].lower() == word[0]: # there is some lower cased words besides articles prepositions and conjunctions
-            return False
-
-    return True
+    functional_words = ARTICLES | PREPOSITIONS | CONJUNCTIONS
+    words = [word
+             for word in title_words[1:]
+             if word not in functional_words]
+    
+    labels = map(get_label, words)
+    ic = filter(lambda l: l == 'IC', labels)
+    al = filter(lambda l: l == 'AL', labels)
+    print(words)
+    if (len(al) == 0 or
+        # some heuristic to check if it's relaly monocase
+        (float(len(al)) / len(ic) <= 0.2
+         and len(al) <= 2 )):
+        return True
+    else:
+        return False
+    
 
 # Mapping for non-standard punctuations to standard ones
 
