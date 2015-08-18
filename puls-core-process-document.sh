@@ -12,17 +12,27 @@ if [ ! -f $1 ] || [ -z $1 ]; then
 	exit -1
 fi
 
-# DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/
-DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
+cap_opt=$2
 
+if [ ! -z $cap_opt ] && [ "$cap_opt" == "cap" ]; then
+	DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/
+else
+	DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
+fi
+
+echo ${DOC_DIR}
 
 while read docid; do
 	doc_path="${DOC_DIR}/${docid}"
 	OP="(process-document \"${doc_path}\" :output-format 'JSON :train-capitalization t :suppress-trace t)"
-	sbcl --core "$CORE" \
-		--noinform \
-		--no-userinit \
-		--disable-debugger \
-		--eval "$OP" \
-		--eval '(sb-ext:quit)'
+	if [ ! -f "${DOC_DIR}/${docid}.auxil" ]; then
+		sbcl --core "$CORE" \
+			--noinform \
+			--no-userinit \
+			--disable-debugger \
+			--eval "$OP" \
+			--eval '(sb-ext:quit)'
+	else
+		echo "auxil exists"
+	fi
 done < $1
