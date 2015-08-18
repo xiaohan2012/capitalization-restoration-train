@@ -1,5 +1,6 @@
-import argparse
-from puls_util import separate_title_from_body
+import sys
+from pathlib import Path
+from puls_util import (separate_title_from_body, get_doc_ids_from_file)
 from label import get_label
 
 
@@ -9,6 +10,12 @@ def output_labels(doc_ids, good_corpus_dir, bad_corpus_dir):
     under bad_corpus_dir
     """
     for doc_id in doc_ids:
+        label_path = bad_corpus_dir + '/{}.labels'.format(doc_id)
+
+        # skip if there
+        if Path(label_path).exists():
+            continue
+
         titles, _ = separate_title_from_body(
             good_corpus_dir + '/{}.auxil'.format(doc_id),
             good_corpus_dir + '/{}.paf'.format(doc_id)
@@ -18,24 +25,13 @@ def output_labels(doc_ids, good_corpus_dir, bad_corpus_dir):
         good_title = titles[0]
         labels = [get_label(w['token']) for w in good_title['features']]
 
-        # print(bad_corpus_dir + '/{}.labels'.format(doc_id))
+        print()
         
-        with open(bad_corpus_dir + '/{}.labels'.format(doc_id), 'w') as f:
+        with open(label_path, 'w') as f:
             f.write(' '.join(labels))
-    
-
-def main():
-    parser = argparse.ArgumentParser(description='Output labels')
-    parser.add_argument('--doc_id_path', help="doc ids path", type=str, required=True)
-    parser.add_argument('--good_dir', help="good corpus dir", type=str, required=True)
-    parser.add_argument('--bad_dir', help="bad corpus dir", type=str, required=True)
-    
-    args = parser.parse_args()
-    
-    with open(args.doc_id_path) as f:
-        doc_ids = [l.strip() for l in f]
         
-    output_labels(doc_ids, args.good_dir, args.bad_dir)
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    output_labels(get_doc_ids_from_file(sys.argv[1]),
+                  sys.argv[2],
+                  sys.argv[3])

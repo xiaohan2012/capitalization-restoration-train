@@ -9,7 +9,10 @@ CURDIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_output_labels():
-    doc_ids = ['001BBB8BFFE6841FA498FCE88C43B63A']
+    doc_ids = [
+        '001BBB8BFFE6841FA498FCE88C43B63A',
+        'existing'  # make sure it won't be processed
+    ]
     mal_dir = CURDIR + '/data/docs_malformed'
     ok_dir = CURDIR + '/data/docs_okformed'
 
@@ -29,4 +32,6 @@ def test_output_labels():
         assert_equal(1, len(ls))
         assert_equal(ls[0].split(), expected)
 
-    
+    with open(CURDIR + '/data/docs_malformed/{}.labels'.format(doc_ids[1])) as f:
+        assert_equal(f.read(), 'I think therefore I exist')
+        
