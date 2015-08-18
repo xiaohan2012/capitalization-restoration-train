@@ -15,7 +15,7 @@ from errors import TitleInconsistencyError
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def printable_train_data(malform_data_dir,
