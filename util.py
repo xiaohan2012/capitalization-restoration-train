@@ -100,10 +100,10 @@ def is_monocase(title_words):
     labels = map(get_label, words)
     ic = filter(lambda l: l == 'IC', labels)
     al = filter(lambda l: l == 'AL', labels)
-    print(words)
     if (len(al) == 0 or
         # some heuristic to check if it's relaly monocase
-        (float(len(al)) / len(ic) <= 0.2
+        (len(ic) and 
+         float(len(al)) / len(ic) <= 0.2
          and len(al) <= 2 )):
         return True
     else:

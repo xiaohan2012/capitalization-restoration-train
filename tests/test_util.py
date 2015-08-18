@@ -69,4 +69,9 @@ def test_is_monocase():
     assert_true(
         is_monocase("Why American Airlines Threw Away Paper Flight Plans in Favor of iPads".split())
     )
+
+    # len(ac) == 0
+    assert_false(
+        is_monocase("Why american airlines threw away paper flight plans in favor of ipads".split())
+    )
     
