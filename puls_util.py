@@ -1,6 +1,5 @@
 import json
 import codecs
-import traceback
 
 from pathlib import Path
 
@@ -14,8 +13,6 @@ from cap_transform import make_capitalized_title
 
 def separate_title_from_body(aux_file_path,
                              paf_file_path):
-    """
-    """
     with codecs.open(aux_file_path, 'r', 'utf8') as aux_f:
         start, end = get_title_position(paf_file_path)
         data = json.loads(aux_f.read())
@@ -64,18 +61,18 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
                 titles, _ = separate_title_from_body(
                     str(auxil_p),
                     str(paf_p))
-            except:  # some .auxil is empty
-                print "DOCID: {}".format(p)
-                print(traceback.format_exc())
+            except Exception as e:
+                yield (e, None)
 
             # pipeline:
             # -> get features
             # -> get tokens
             # -> capitalize headline
-            yield (p.name,
+            res = (p.name,
                    list(map(compose(make_capitalized_title_new,
                                     get_tokens, get_features),
                             titles)))
+            yield (None, res)
 
 
 def get_doc_ids_from_file(path):
