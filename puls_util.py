@@ -78,6 +78,13 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
                             titles)))
 
 
+def get_doc_ids_from_file(path):
+    """path: line based doc id file"""
+    with open(path) as f:
+        docids = set([l.strip() for l in f])
+    return docids
+
+
 def get_input_example(okform_dir, malformed_dir, id_):
     cap_title_path = str(Path(malformed_dir) / Path(id_)) + '.auxil'
     doc_path = str(Path(okform_dir) / Path(id_))

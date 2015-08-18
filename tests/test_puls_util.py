@@ -3,7 +3,8 @@ import os
 import codecs
 from capitalization_train.puls_util import (separate_title_from_body,
                                             extract_and_capitalize_headlines_from_corpus,
-                                            get_input_example)
+                                            get_input_example,
+                                            get_doc_ids_from_file)
 from nose.tools import assert_equal
 
 
@@ -61,3 +62,11 @@ def test_input_example():
                 "otherSentences": body_sents}
 
     assert_equal(actual, expected)
+
+
+def test_get_doc_ids_from_file():
+    ids = get_doc_ids_from_file(CURDIR + '/data/docids.txt')
+    assert_equal(ids, set(['001BBB8BFFE6841FA498FCE88C43B63A',
+                           '4B4DE4C180DB7697035273DB90BF5101',
+                           '86FD993DE4DB76B74503D068A72A72BB']))
+    
