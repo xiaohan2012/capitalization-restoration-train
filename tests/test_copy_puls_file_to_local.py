@@ -9,8 +9,10 @@ CURDIR = os.path.dirname(os.path.realpath(__file__))
 
 def test_copy():
     local_dir = CURDIR + '/data/local_dir'
-    # create one file first
+    for p in Path(local_dir).iterdir():
+        p.unlink()
 
+    # create some first
     exist_names = ['/86FD993DE4DB76B74503D068A72A72BB',
                    '/86FD993DE4DB76B74503D068A72A72BB.paf']
     for name in exist_names:
