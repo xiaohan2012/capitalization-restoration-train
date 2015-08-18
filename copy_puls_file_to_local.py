@@ -10,7 +10,10 @@ def copy(fname_and_tile_file_path, target_dir):
         target_dir.mkdir()
 
     with codecs.open(fname_and_tile_file_path, 'r', 'utf8') as global_f:
-        for l in global_f:
+        for i, l in enumerate(global_f):
+            if i % 100 == 0:
+                print("{} finished".format(i))
+
             path, title = json.loads(l.strip())
             
             target_path_text = target_dir / Path(path).name
