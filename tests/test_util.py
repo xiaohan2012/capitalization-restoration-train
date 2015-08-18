@@ -1,5 +1,5 @@
 import os
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_false
 from capitalization_train.util import (extract_title,
                                        get_document_content_paf,
                                        is_monocase)
@@ -45,3 +45,28 @@ def test_is_monocase():
             "KSL Capital Partners Announces the Sale of Malmaison and Hotel du Vin".split()
         )
     )
+
+    assert_true(
+        is_monocase("Global Eagle Entertainment and SES Sign a Strategic Partnership to Deliver Global Ku-Band Satellite in-Flight Connectivity to Airlines".split())
+    )
+
+    assert_false(
+        is_monocase("Agenda Released for the 17th annual Summit on Superbugs & Superdrugs".split())
+    )
+    
+    assert_true(
+        is_monocase("How Find Your Inner Martin Scorsese to Build Brand & Rule the World".split())
+    )
+    
+    assert_true(
+        is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split())
+    )
+    
+    assert_true(
+        is_monocase("Crystal Bridges Announces 2015 Exhibits, Including Warhol, van Gogh, Pollock".split())
+    )
+
+    assert_true(
+        is_monocase("Why American Airlines Threw Away Paper Flight Plans in Favor of iPads".split())
+    )
+    
