@@ -30,10 +30,13 @@ def test_separate_title_from_body():
 
 
 def test_extract_and_capitalize_headlines_from_corpus():
-    doc_id
+    doc_ids = ['EEBADC60811702C931B0F6CB61CE9054',
+               '4271571E96D5C726ECFDDDAACA74A264']
     corpus_dir = '/cs/fs/home/hxiao/code/capitalization_train/test_data/puls_format_raw/'
-    result = list(extract_and_capitalize_headlines_from_corpus(corpus_dir))
-    assert_equal(len(result), 100)
+    result = list(extract_and_capitalize_headlines_from_corpus(
+        corpus_dir, doc_ids)
+    )
+    assert_equal(len(result), 2)
     assert_equal(result[0][0], 'EEBADC60811702C931B0F6CB61CE9054')
     assert_equal(len(result[0][1]), 1)
     assert_equal(result[0][1][0],
@@ -47,6 +50,7 @@ def test_extract_and_capitalize_headlines_from_corpus():
     assert_equal(len(result1[1]), 2)
 
 
+# TODO: 
 def test_input_example():
     actual = get_input_example(
         CURDIR + '/data/docs_okformed/',

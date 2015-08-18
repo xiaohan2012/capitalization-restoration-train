@@ -54,28 +54,28 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
     
     make_capitalized_title_new = (lambda words:
                                   make_capitalized_title(title_words=words))
+    
+    for docid in docids:
+        p = Path(corpus_dir) / Path(docid)
+        auxil_p = p.with_suffix('.auxil')
+        paf_p = p.with_suffix('.paf')
+        if auxil_p.exists() and paf_p.exists():
+            try:
+                titles, _ = separate_title_from_body(
+                    str(auxil_p),
+                    str(paf_p))
+            except:  # some .auxil is empty
+                print "DOCID: {}".format(p)
+                print(traceback.format_exc())
 
-    for p in Path(corpus_dir).iterdir():
-        if p.suffix == '':
-            auxil_p = p.with_suffix('.auxil')
-            paf_p = p.with_suffix('.paf')
-            if auxil_p.exists() and paf_p.exists():
-                try:
-                    titles, _ = separate_title_from_body(
-                        str(auxil_p),
-                        str(paf_p))
-                except:  # some .auxil is empty
-                    print "DOCID: {}".format(p)
-                    print(traceback.format_exc())
-
-                # pipeline:
-                # -> get features
-                # -> get tokens
-                # -> capitalize headline
-                yield (p.name,
-                       list(map(compose(make_capitalized_title_new,
-                                        get_tokens, get_features),
-                                titles)))
+            # pipeline:
+            # -> get features
+            # -> get tokens
+            # -> capitalize headline
+            yield (p.name,
+                   list(map(compose(make_capitalized_title_new,
+                                    get_tokens, get_features),
+                            titles)))
 
 
 def get_input_example(okform_dir, malformed_dir, id_):
