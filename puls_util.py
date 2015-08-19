@@ -19,7 +19,6 @@ def separate_title_from_body(aux_file_path,
 
         within_range = (lambda sent:
                         sent['start'] >= start and sent['end'] <= end)
-
         title_sents = []
         body_sents = []
         for sent in data['sents']:
@@ -63,16 +62,14 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
                     str(paf_p))
             except Exception as e:
                 yield (e, None)
-
             # pipeline:
             # -> get features
             # -> get tokens
             # -> capitalize headline
-            res = (p.name,
+            yield (p.name,
                    list(map(compose(make_capitalized_title_new,
                                     get_tokens, get_features),
                             titles)))
-            yield (None, res)
 
 
 def get_doc_ids_from_file(path):
@@ -82,15 +79,34 @@ def get_doc_ids_from_file(path):
     return docids
 
 
+def convert_sentence_auxil_to_request(sent_auxil):
+    assert isinstance(sent_auxil, list), sent_auxil
+    ret = {}
+    ret['tokens'] = list(map(lambda r: r['token'], sent_auxil))
+    ret['pos'] = list(map(lambda r: r['pos'], sent_auxil))
+    return ret
+
+
 def get_input_example(okform_dir, malformed_dir, id_):
     cap_title_path = str(Path(malformed_dir) / Path(id_)) + '.auxil'
     doc_path = str(Path(okform_dir) / Path(id_))
     
     _, docs = separate_title_from_body(doc_path + '.auxil',
                                        doc_path + '.paf')
-    
-    with codecs.open(cap_title_path, 'r', 'utf8') as f:
-        title = json.loads(f.read())
 
-    return {'capitalizedSentences': [title],
-            'otherSentences': docs}
+    with codecs.open(cap_title_path, 'r', 'utf8') as f:
+        for l in f:
+            pass
+
+        titles = list(map(
+            lambda s: convert_sentence_auxil_to_request(s['features']),
+            json.loads(l)['sents'])
+        )
+        
+    doc_sents = list(map(
+        lambda s: convert_sentence_auxil_to_request(s['features']),
+        docs)
+    )
+    return {'capitalizedSentences': titles,
+            'otherSentences': doc_sents
+    }
