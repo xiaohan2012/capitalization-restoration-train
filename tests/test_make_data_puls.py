@@ -39,26 +39,26 @@ def test_print_trainable_data():
     ids = ['001BBB8BFFE6841FA498FCE88C43B63A',
            '4B4DE4C180DB7697035273DB90BF5101']
     res = printable_train_data(malform_data_dir=malform_data_dir,
-                               okform_data_dir=okform_data_dir,
-                               ids=ids,
-                               extractor=extractor,
-                               feature_names=extractor.feature_names,
-                               start=0, end=2,
-                               title_transform_func=make_capitalized_title)
-    sent1 = res.next()
+                                    okform_data_dir=okform_data_dir,
+                                    ids=ids,
+                                    extractor=extractor,
+                                    feature_names=extractor.feature_names,
+                                    start=0, end=2,
+                                    title_transform_func=make_capitalized_title)
+    id_, sent1 = res.next()
 
-    expected1 = """nanobiotix name_oov IC
-get tv AL
-early d AL
-positive adj IC
-safety n IC
-result n MX
-in csn AU
-head n AL
-and None AL
-neck n AL
-clinical adj AL
-trial n AL
+    expected1 = """nanobiotix\tname_oov\tIC
+get\ttv\tAL
+early\td\tAL
+positive\tadj\tIC
+safety\tn\tIC
+result\tn\tMX
+in\tcsn\tAU
+head\tn\tAL
+and\tNone\tAL
+neck\tn\tAL
+clinical\tadj\tAL
+trial\tn\tAL
 """
     assert_equal(sent1, expected1)
 
