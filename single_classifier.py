@@ -11,6 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (classification_report, accuracy_score,
                              precision_recall_fscore_support,
                              confusion_matrix)
+from sklearn import cross_validation
 from sklearn.externals import joblib
 from sklearn.grid_search import GridSearchCV
 
@@ -22,14 +23,14 @@ from unigram import UnigramLabeler
 from error_display import print_label_error
 
 # turn this ON when you want to rebuild the data matrices
-LOAD_FROM_CACHE = 0
+LOAD_FROM_CACHE = 1
 RETRAIN_MODEL = 1
 ERROR_REPORT = 0
 
 # Data preparation
 
-train_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/train.crfsuite.txt"
-test_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/feature/cap/1+2+3+4+5+6/test.crfsuite.txt"
+train_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/train.crfsuite.txt"
+test_path = "/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/test.crfsuite.txt"
 
 if not LOAD_FROM_CACHE:
     train_x, train_y = load_crfsuite_format_data(
@@ -89,10 +90,23 @@ else:
     dict_vect = pickle.load(open('cached_data/dict_vect.pkl', 'r'))
     label_encoder = pickle.load(open('cached_data/label_encoder.pkl', 'r'))
 
+# print(train_x.shape)
+# # print(train_x[0])
+
 if RETRAIN_MODEL:
     # Train
-    print "training model"
+    train_x, test_x, train_y, test_y = cross_validation.train_test_split(
+        train_x,
+        train_y,
+        test_size=0.1,
+        random_state=0)
 
+    print(train_x.shape)
+    print(train_y.shape)
+    print(test_x.shape)
+    print(test_y.shape)
+
+    print "training model"
     model = LogisticRegression(penalty='l2',
                                C=1.0,
                                verbose=2)
