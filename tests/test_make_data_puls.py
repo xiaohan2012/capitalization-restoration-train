@@ -2,17 +2,21 @@ import os
 
 from nose.tools import assert_equal
 
-from capitalization_train.make_data_puls import printable_train_data
+from capitalization_train.make_puls_data import (printable_train_data,
+                                                 map_value_string)
 from capitalization_train.data import make_capitalized_title
 
 from capitalization_restoration.feature_extractor import (FeatureExtractor,
                                                           LemmaFeature,
-                                                          POSFeature)
+                                                          POSFeature,
+                                                          BeginsWithAlphaFeature)
 
 
 CURDIR = os.path.dirname(os.path.realpath(__file__))
 
-extractor = FeatureExtractor([LemmaFeature(), POSFeature()])
+extractor = FeatureExtractor([LemmaFeature(),
+                              POSFeature(),
+                              BeginsWithAlphaFeature()])
 
 
 sent1_json = [{u'lemma': u'nanobiotix',
@@ -39,29 +43,34 @@ def test_print_trainable_data():
     ids = ['001BBB8BFFE6841FA498FCE88C43B63A',
            '4B4DE4C180DB7697035273DB90BF5101']
     res = printable_train_data(malform_data_dir=malform_data_dir,
-                                    okform_data_dir=okform_data_dir,
-                                    ids=ids,
-                                    extractor=extractor,
-                                    feature_names=extractor.feature_names,
-                                    start=0, end=2,
-                                    title_transform_func=make_capitalized_title)
+                               okform_data_dir=okform_data_dir,
+                               ids=ids,
+                               extractor=extractor,
+                               feature_names=extractor.feature_names,
+                               start=0, end=2,
+                               title_transform_func=make_capitalized_title)
     id_, sent1 = res.next()
-
-    expected1 = """nanobiotix\tname_oov\tIC
-get\ttv\tAL
-early\td\tAL
-positive\tadj\tIC
-safety\tn\tIC
-result\tn\tMX
-in\tcsn\tAU
-head\tn\tAL
-and\tNone\tAL
-neck\tn\tAL
-clinical\tadj\tAL
-trial\tn\tAL
+    expected1 = u"""nanobiotix\tname_oov\t--T\tIC
+get\ttv\t--T\tAL
+early\td\t--T\tAL
+positive\tadj\t--T\tIC
+safety\tn\t--T\tIC
+result\tn\t--T\tMX
+in\tcsn\t--T\tAU
+head\tn\t--T\tAL
+and\tNone\t--T\tAL
+neck\tn\t--T\tAL
+clinical\tadj\t--T\tAL
+trial\tn\t--T\tAL
 """
     assert_equal(sent1, expected1)
 
     assert_equal(len(list(res)), 1)  # 2 sentences in total
 
 
+def test_map_value_string():
+    assert_equal(map_value_string('A'), 'A')
+    assert_equal(map_value_string(''), '')
+    assert_equal(map_value_string(True), '--T')
+    assert_equal(map_value_string(False), '--F')
+    
