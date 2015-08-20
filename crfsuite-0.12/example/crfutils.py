@@ -22,17 +22,6 @@ def apply_templates(X, templates):
     for template in templates:
         name = '|'.join(['%s[%d]' % (f, o) for f, o in template])
         for t in range(len(X)):
-            # ignore template that contain only one feature
-            # meanwhile the feature value is False(inactivated)
-            ### If you change this
-            ### change also the crfutils.py in crfsuite
-            ### The only different is the representation False|True in str format
-            if len(template) == 1:
-                field, offset = template[0]
-                p = t + offset
-                if p in range(len(X)) and X[p][field] == '--F':
-                    continue
-
             values = []
             for field, offset in template:
                 p = t + offset

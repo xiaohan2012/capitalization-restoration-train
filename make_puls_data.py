@@ -18,14 +18,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-value_mapping = {True: '--T',
-                 False: '--F'}
-
-
-def map_value_string(value):
-    return value_mapping.get(value, value)
-
-
 def printable_train_data(malform_data_dir,
                          okform_data_dir,
                          ids,
@@ -172,7 +164,7 @@ def printable_train_data(malform_data_dir,
                     res = unicode()
                     for word in words:
                         word_feature_str = u'\t'.join(
-                            [unicode(map_value_string(word[feature_name]))
+                            [unicode(word[feature_name])
                              for feature_name in feature_names])
                         res += word_feature_str + '\n'
                     n_collected += 1

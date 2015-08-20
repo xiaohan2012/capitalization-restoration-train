@@ -2,8 +2,7 @@ import os
 
 from nose.tools import assert_equal
 
-from capitalization_train.make_puls_data import (printable_train_data,
-                                                 map_value_string)
+from capitalization_train.make_puls_data import printable_train_data
 from capitalization_train.data import make_capitalized_title
 
 from capitalization_restoration.feature_extractor import (FeatureExtractor,
@@ -50,27 +49,20 @@ def test_print_trainable_data():
                                start=0, end=2,
                                title_transform_func=make_capitalized_title)
     id_, sent1 = res.next()
-    expected1 = u"""nanobiotix\tname_oov\t--T\tIC
-get\ttv\t--T\tAL
-early\td\t--T\tAL
-positive\tadj\t--T\tIC
-safety\tn\t--T\tIC
-result\tn\t--T\tMX
-in\tcsn\t--T\tAU
-head\tn\t--T\tAL
-and\tNone\t--T\tAL
-neck\tn\t--T\tAL
-clinical\tadj\t--T\tAL
-trial\tn\t--T\tAL
+    assert_equal.__self__.maxDiff = None
+    expected1 = u"""nanobiotix	name_oov	True	IC
+get	tv	True	AL
+early	d	True	AL
+positive	adj	True	IC
+safety	n	True	IC
+result	n	True	MX
+in	csn	True	AU
+head	n	True	AL
+and	None	True	AL
+neck	n	True	AL
+clinical	adj	True	AL
+trial	n	True	AL
 """
     assert_equal(sent1, expected1)
 
     assert_equal(len(list(res)), 1)  # 2 sentences in total
-
-
-def test_map_value_string():
-    assert_equal(map_value_string('A'), 'A')
-    assert_equal(map_value_string(''), '')
-    assert_equal(map_value_string(True), '--T')
-    assert_equal(map_value_string(False), '--F')
-    
