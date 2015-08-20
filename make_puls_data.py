@@ -200,8 +200,8 @@ if __name__ == '__main__':
         successful_ids.append(id_)
         print l.encode('utf8')
 
-    with open('data/trainable_doc_ids_{}.txt'.format(
-            time.strftime("%Y-%m-%d_%H:%M")),
+    with open('data/tmp/{}/trainable_doc_ids.txt'.format(
+            time.strftime("%Y-%m-%d")),
             'w') as f:
         for i in successful_ids:
             f.write("{}\n".format(i))
