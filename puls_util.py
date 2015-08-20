@@ -80,10 +80,10 @@ def get_doc_ids_from_file(path):
 
 
 def convert_sentence_auxil_to_request(sent_auxil):
-    assert isinstance(sent_auxil, list), sent_auxil
-    ret = {}
-    ret['tokens'] = list(map(lambda r: r['token'], sent_auxil))
-    ret['pos'] = list(map(lambda r: r['pos'], sent_auxil))
+    assert isinstance(sent_auxil, dict), sent_auxil
+    ret = {'no': sent_auxil['sentno']}
+    ret['tokens'] = list(map(lambda r: r['token'], sent_auxil['features']))
+    ret['pos'] = list(map(lambda r: r['pos'], sent_auxil['features']))
     return ret
 
 
@@ -99,14 +99,23 @@ def get_input_example(okform_dir, malformed_dir, id_):
             pass
 
         titles = list(map(
-            lambda s: convert_sentence_auxil_to_request(s['features']),
+            convert_sentence_auxil_to_request,
             json.loads(l)['sents'])
         )
         
     doc_sents = list(map(
-        lambda s: convert_sentence_auxil_to_request(s['features']),
+        convert_sentence_auxil_to_request,
         docs)
     )
     return {'capitalizedSentences': titles,
             'otherSentences': doc_sents
     }
+
+
+if __name__ == '__main__':
+    import sys
+    import json
+    ok_corpus_dir = '/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format'
+    malformed_corpus_dir = '/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized'
+    res = get_input_example(ok_corpus_dir, malformed_corpus_dir, sys.argv[1])
+    print(json.dumps(res).encode('utf8'))

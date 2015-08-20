@@ -63,9 +63,9 @@ def test_input_example():
     print(cap_title_sent)
     expected = {"capitalizedSentences":
                 [convert_sentence_auxil_to_request(
-                    cap_title_sent['features'])],
+                    cap_title_sent)],
                 "otherSentences": map(
-                    lambda s: convert_sentence_auxil_to_request(s['features']),
+                    convert_sentence_auxil_to_request,
                     body_sents)
     }
     print(expected)
@@ -74,8 +74,9 @@ def test_input_example():
 
 def test_convert_sentence_auxil_to_request():
     sent_auxil = {"sentno":0,"start":51,"end":128,"features":[{"lemma":"nanobiotix","pos":"name_oov","token":"Nanobiotix"},{"lemma":"get","pos":"tv","token":"Gets"},{"lemma":"early","pos":"d","token":"Early"},{"lemma":"positive","pos":"adj","token":"Positive"},{"lemma":"safety","pos":"n","token":"Safety"},{"lemma":"result","pos":"n","token":"Results"}]}
-    actual = convert_sentence_auxil_to_request(sent_auxil['features'])
-    expected = {'tokens': ['Nanobiotix', 'Gets', 'Early', 'Positive', 'Safety', 'Results'],
+    actual = convert_sentence_auxil_to_request(sent_auxil)
+    expected = {'no': 0,
+                'tokens': ['Nanobiotix', 'Gets', 'Early', 'Positive', 'Safety', 'Results'],
                 'pos': ['name_oov', 'tv', 'd', 'adj', 'n', 'n']
     }
     assert_equal(actual, expected)
@@ -84,5 +85,3 @@ def test_convert_sentence_auxil_to_request():
 def test_get_doc_ids_from_file():
     ids = get_doc_ids_from_file(CURDIR + '/data/docids.txt')
     assert_equal(len(ids), 4)
-    
-
