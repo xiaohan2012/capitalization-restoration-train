@@ -47,16 +47,15 @@ def test_print_trainable_data():
                                extractor=extractor,
                                feature_names=extractor.feature_names,
                                start=0, end=2,
-                               title_transform_func=make_capitalized_title)
+                               title_transform_func=make_capitalized_title,
+                               exclude_labels=set(['AU', 'MX']),
+                               exclude_word_positions=set([0]))
     id_, sent1 = res.next()
     assert_equal.__self__.maxDiff = None
-    expected1 = u"""nanobiotix	name_oov	True	IC
-get	tv	True	AL
+    expected1 = u"""get	tv	True	AL
 early	d	True	AL
 positive	adj	True	IC
 safety	n	True	IC
-result	n	True	MX
-in	csn	True	AU
 head	n	True	AL
 and	None	True	AL
 neck	n	True	AL

@@ -20,10 +20,12 @@ logger.setLevel(logging.INFO)
 
 def printable_train_data(malform_data_dir,
                          okform_data_dir,
-                         ids,
+                         ids,           
                          extractor, feature_names,
                          start, end=None,
-                         title_transform_func=make_capitalized_title):
+                         title_transform_func=make_capitalized_title,
+                         exclude_labels=None,
+                         exclude_word_positions=set([0])):
     """
 
     Adapted to PULS requirement:
@@ -47,7 +49,8 @@ def printable_train_data(malform_data_dir,
     title_transform_func: function
         funtion that accepts the title and transforms it
         into some badly capitalized version
-    
+    exclude_labels: iterable of str
+        labels that we don't consider
     Returns
     ------------
     Generator of str:
@@ -162,11 +165,14 @@ def printable_train_data(malform_data_dir,
 
                     # format the features in the required form
                     res = unicode()
-                    for word in words:
-                        word_feature_str = u'\t'.join(
-                            [unicode(word[feature_name])
-                             for feature_name in feature_names])
-                        res += word_feature_str + '\n'
+                    for i, word in enumerate(words):
+                        if (i not in exclude_word_positions
+                            and exclude_labels
+                            and word['y'] not in exclude_labels):
+                            word_feature_str = u'\t'.join(
+                                [unicode(word[feature_name])
+                                 for feature_name in feature_names])
+                            res += word_feature_str + '\n'
                     n_collected += 1
                     yield id_, res
         except IOError:
@@ -177,6 +183,7 @@ def printable_train_data(malform_data_dir,
 if __name__ == '__main__':
     import sys
     from puls_util import get_doc_ids_from_file
+    exclude_labels = set(['MX', 'AU'])
     ids = get_doc_ids_from_file(sys.argv[1])
 
     malform_data_dir = '/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/'
@@ -191,12 +198,13 @@ if __name__ == '__main__':
 
     successful_ids = []
     for id_, l in printable_train_data(malform_data_dir,
-                                  okform_data_dir,
-                                  ids,
-                                  extractor=extractor,
-                                  feature_names=extractor.feature_names,
-                                  start=start, end=end,
-                                  title_transform_func=make_capitalized_title):
+                                       okform_data_dir,
+                                       ids,
+                                       extractor=extractor,
+                                       feature_names=extractor.feature_names,
+                                       start=start, end=end,
+                                       title_transform_func=make_capitalized_title,
+                                       exclude_labels=exclude_labels):
         successful_ids.append(id_)
         print l.encode('utf8')
 
