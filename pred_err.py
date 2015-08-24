@@ -50,7 +50,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Error analysis utility")
     parser.add_argument("--model", required=True, type=str, help="Model path")
     parser.add_argument("--sent_path", required=True, type=str,
-                        help="Sentence path")
+                        help="Sentence path(test.txt)")
     parser.add_argument("--crfsuite_path", required=True, type=str,
                         help="Crfsuite--extracted features path")
     parser.add_argument("--true_label", required=True, type=str,
