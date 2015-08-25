@@ -66,10 +66,10 @@ def extract_and_capitalize_headlines_from_corpus(corpus_dir, docids):
             # -> get features
             # -> get tokens
             # -> capitalize headline
-            yield (p.name,
-                   list(map(compose(make_capitalized_title_new,
-                                    get_tokens, get_features),
-                            titles)))
+            yield (None, (p.name,
+                          list(map(compose(make_capitalized_title_new,
+                                           get_tokens, get_features),
+                                   titles))))
 
 
 def get_doc_ids_from_file(path):

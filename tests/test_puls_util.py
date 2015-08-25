@@ -41,17 +41,18 @@ def test_extract_and_capitalize_headlines_from_corpus():
     )
     print(result[0])
     assert_equal(len(result), 2)
-    assert_equal(result[0][0], 'EEBADC60811702C931B0F6CB61CE9054')
-    assert_equal(len(result[0][1]), 1)
-    assert_equal(result[0][1][0],
-                 [u'Microsoft', u'Gives', u'New', u'Brand', u'Identity',
-                  u'to', u'Nokia', u'Retail', u'Stores'])
+    assert_equal(result[0][0], None)
+    assert_equal(len(result[0][1][1]), 1)
+    assert_equal(result[0][1][0], 'EEBADC60811702C931B0F6CB61CE9054')
+    assert_equal(result[0][1][1],
+                 [[u'Microsoft', u'Gives', u'New', u'Brand', u'Identity',
+                  u'to', u'Nokia', u'Retail', u'Stores']])
 
-    result1 = filter(lambda (docid, _):
+    result1 = filter(lambda (_, (docid, __)):
                      docid == '4271571E96D5C726ECFDDDAACA74A264',
                      result)
     
-    assert_equal(len(result1[0][1]), 2)
+    assert_equal(len(result1[0][1][1]), 2)
 
 
 def test_input_example():

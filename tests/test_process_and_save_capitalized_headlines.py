@@ -19,7 +19,8 @@ def test_process_and_save():
               '4271571E96D5C726ECFDDDAACA74A264']
     process_and_save(corpus_dir=CURDIR + '/../test_data/puls_format_raw',
                      target_dir=target_dir,
-                     docids=docids)
+                     docids=docids,
+                     refresh=False)
     count = 0
     for p in Path(target_dir).iterdir():
         if p.suffix == '':
