@@ -75,7 +75,7 @@ def printable_train_data(malform_data_dir,
         if i < start:
             continue
             
-        if i % 100 == 0:
+        if i % 1000 == 0:
             logger.info("Collected %d" % n_collected)
             logger.info("Finished %d" % i)
 
@@ -108,7 +108,7 @@ def printable_train_data(malform_data_dir,
                         okform_paf_path
                     )
                 except:
-                    logger.error(traceback.format_exc())
+                    logger.debug(traceback.format_exc())
                     continue
 
                 # extract the tokens
@@ -184,6 +184,9 @@ def printable_train_data(malform_data_dir,
                     )
         except IOError:
             logger.debug("{}.auxil file not found".format(id_))
+            continue
+        except ValueError:
+            logger.debug(traceback.format_exc())
             continue
         except:
             logger.error(traceback.format_exc())
