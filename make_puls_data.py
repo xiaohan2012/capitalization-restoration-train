@@ -20,7 +20,7 @@ logger.setLevel(logging.INFO)
 
 def printable_train_data(malform_data_dir,
                          okform_data_dir,
-                         ids,           
+                         ids,
                          extractor, feature_names,
                          start, end=None,
                          title_transform_func=make_capitalized_title,
@@ -51,6 +51,7 @@ def printable_train_data(malform_data_dir,
         into some badly capitalized version
     exclude_labels: iterable of str
         labels that we don't consider
+
     Returns
     ------------
     Generator of str:
@@ -74,17 +75,19 @@ def printable_train_data(malform_data_dir,
         if i < start:
             continue
             
-        if i % 1000 == 0:
-            logger.error("Collected %d" % n_collected)
-            logger.error("Finished %d" % i)
+        if i % 100 == 0:
+            logger.info("Collected %d" % n_collected)
+            logger.info("Finished %d" % i)
 
         if end is not None and i >= end:
-            logger.error("Reached %d. Terminate." % end)
+            logger.info("Reached %d. Terminate." % end)
             break
 
         try:
+
             with (malform_data_dir / Path(id_)).with_suffix('.auxil')\
                                                .open(encoding='utf8') as f:
+                logger.debug('processing: {}'.format(id_))
                 # to get the last line
                 for l in f:
                     pass
@@ -94,7 +97,7 @@ def printable_train_data(malform_data_dir,
                 except ValueError:
                     logger.debug('JSON parse error')
                     continue
-                    
+
                 okform_auxil_path = str((okform_data_dir /
                                          Path(id_)).with_suffix('.auxil'))
                 okform_paf_path = str((okform_data_dir /
@@ -104,8 +107,8 @@ def printable_train_data(malform_data_dir,
                         okform_auxil_path,
                         okform_paf_path
                     )
-                except (TypeError, IOError, ValueError):
-                    logger.debug(traceback.format_exc())
+                except:
+                    logger.error(traceback.format_exc())
                     continue
 
                 # extract the tokens
@@ -160,7 +163,7 @@ def printable_train_data(malform_data_dir,
                             logger.debug('TitleInconsistencyError')
                             continue
                         except:
-                            logger.debug(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             continue
 
                     # format the features in the required form
@@ -175,10 +178,16 @@ def printable_train_data(malform_data_dir,
                             res += word_feature_str + '\n'
                     n_collected += 1
                     yield id_, res
+                else:
+                    raise ValueError(
+                        '# of title sentences more than 1: {}'.format(id_)
+                    )
         except IOError:
             logger.debug("{}.auxil file not found".format(id_))
             continue
-            
+        except:
+            logger.error(traceback.format_exc())
+            continue
 
 if __name__ == '__main__':
     import sys
@@ -208,9 +217,10 @@ if __name__ == '__main__':
         successful_ids.append(id_)
         print l.encode('utf8')
 
-    with open('data/tmp/{}/trainable_doc_ids.txt'.format(
-            time.strftime("%Y-%m-%d")),
-            'w') as f:
+    # now = time.strftime("%Y-%m-%d")
+    now = '2015-08-18'
+    with open('data/tmp/{}/trainable_doc_ids.txt'.format(now),
+              'w') as f:
         for i in successful_ids:
             f.write("{}\n".format(i))
 
