@@ -11,7 +11,7 @@ from capitalization_restoration.feature_templates import (lexical_features,
                                                           spelling_features,
                                                           document_features)
 from capitalization_restoration.feature_extractor import DEFAULT_FEATURES
-
+from pprint import pformat
 
 # Separator of field values.
 separator = '\t'
@@ -45,6 +45,7 @@ if __name__ == '__main__':
         templates += id2feature[fid]
 
     sys.stderr.write("Feature field names: %s\n" % fields)
+    sys.stderr.write("Tempates: %s\n" % pformat(templates))
 
     def feature_extractor(X):
         # Apply attribute templates to obtain features (in fact, attributes)
