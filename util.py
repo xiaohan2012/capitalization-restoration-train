@@ -51,7 +51,28 @@ def get_title_position(path):
                 return start, end
 
     raise Exception("Unable to find start and end position for %s" %path)
-            
+
+
+def extract_title(path):
+    """
+    Given document file path
+    Extract the title
+
+    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/12/www.ameinfo.com.rssfeeds.10660/DE01D30EA383DFD9FA1427CB9CC935F2")
+    u'Polaroid launches new range of products at opening day of GITEX Technology Week 2014'
+    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/online.wsj.com.xml.rss.3_7031/3918A8D35025B47AC6A62D293F5F506F")
+    u'Bad Bets Rock Fortress\u2019s Macro Fund'
+    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/feeds.foxbusiness.com.foxbusiness/E1D1899ED1CDEAB1574C1D279CBA2632")
+    u'Is Gold\u2019s Knockout Punch Coming?'
+    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/www.streetinsider.com.freefeed.php/34D4137A7AEB5118C6E9EC451E66B529") 
+    u'Solving IT Debuts on Staffing Industry Analysts\u2019 Top 100 Fastest-Growing U.S. Staffing and Talent Engagement Firms'
+    """
+    start, end = get_title_position(path + ".paf")
+    with decode_open(path, "r", "utf8") as doc:
+        #extract the content
+        content = doc.read()
+        return "".join(content[start: end])
+
 
 def get_document_content_paf(path):
     """
@@ -64,6 +85,21 @@ def get_document_content_paf(path):
     with decode_open(path, "r", "utf8", "ignore") as doc:
         content = doc.read()
         return "".join(content[end:])
+
+
+def get_title_and_content_by_paf(path):
+    """
+    Return:
+    the content before the title,
+    the title
+    the body
+    """
+    start, end = get_title_position(path + ".paf")
+    with decode_open(path, "r", "utf8", "ignore") as doc:
+        content = doc.read()
+        return ("".join(content[:start]),
+                "".join(content[start:end]),
+                "".join(content[end:]))
 
 
 def get_document_content(path):
@@ -150,26 +186,6 @@ def normalize_title(s):
         traceback.print_exc(file=sys.stderr)
 
     
-def extract_title(path):
-    """
-    Given document file path
-    Extract the title 
-
-    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/12/www.ameinfo.com.rssfeeds.10660/DE01D30EA383DFD9FA1427CB9CC935F2")
-    u'Polaroid launches new range of products at opening day of GITEX Technology Week 2014'
-    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/online.wsj.com.xml.rss.3_7031/3918A8D35025B47AC6A62D293F5F506F")
-    u'Bad Bets Rock Fortress\u2019s Macro Fund'
-    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/feeds.foxbusiness.com.foxbusiness/E1D1899ED1CDEAB1574C1D279CBA2632")
-    u'Is Gold\u2019s Knockout Punch Coming?'
-    >>> extract_title("/group/home/puls/Shared/capitalization-recovery/30/www.streetinsider.com.freefeed.php/34D4137A7AEB5118C6E9EC451E66B529") 
-    u'Solving IT Debuts on Staffing Industry Analysts\u2019 Top 100 Fastest-Growing U.S. Staffing and Talent Engagement Firms'
-    """
-    start, end = get_title_position(path + ".paf")
-    with decode_open(path, "r", "utf8") as doc:
-        #extract the content
-        content = doc.read()
-        return "".join(content[start: end])
-
 def get_reuter_file_paths(dirs = []):
     """
     Get the zip file paths under the directories `dirs`

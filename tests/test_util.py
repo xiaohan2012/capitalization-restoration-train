@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import os
 from nose.tools import assert_equal, assert_true, assert_false
 from capitalization_train.util import (extract_title,
                                        get_document_content_paf,
-                                       is_monocase)
+                                       is_monocase,
+                                       get_title_and_content_by_paf)
 
 
 CURDIR = os.path.dirname(os.path.realpath(__file__))
@@ -25,6 +28,20 @@ def test_get_document_content_paf():
     assert_true(len(actual.strip()) > 400)
 
 
+def test_get_title_and_content_by_paf():
+    starting_content, title, body\
+        = get_title_and_content_by_paf(
+            CURDIR + '/data/docs_okformed/001BBB8BFFE6841FA498FCE88C43B63A'
+        )
+    assert_equal(starting_content,
+                 "20150609\n001BBB8BFFE6841FA498FCE88C43B63A\n")
+    assert_equal(
+        title,
+        "UPDATE - Nanobiotix gets early Positive Safety rEsults IN head and neck clinical trial"
+    )
+    assert_true(len(body.strip()) > 400)
+
+    
 def test_is_monocase():
     assert_true(
         is_monocase(
