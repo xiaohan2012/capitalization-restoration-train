@@ -11,6 +11,7 @@ CURDIR = os.path.dirname(os.path.realpath(__file__))
 
 mal_dir = CURDIR + '/data/docs_malformed'
 ok_dir = CURDIR + '/data/docs_okformed'
+rb_dir = CURDIR + '/data/docs_rule_based'
 
 def test_output_labels():
     doc_ids = [
@@ -43,25 +44,23 @@ def test_make_rule_based_corpus():
            '4B4DE4C180DB7697035273DB90BF5101']
     
     for id_ in ids:
-        p = Path(ok_dir, id_).with_suffix('.wb')
+        p = Path(rb_dir, id_)
         if p.exists():
             p.unlink()
 
-    make_rule_based_corpus(ids, ok_dir, mal_dir, file_suffix='.wb')
+    make_rule_based_corpus(ids, ok_dir, rb_dir)
     
     cnt = 0
     for id_ in ids:
-        p = Path(mal_dir, id_).with_suffix('.wb')
+        p = Path(rb_dir, id_)
         if p.exists():
             cnt += 1
     assert_equal(cnt, len(ids))
         
-    with Path(mal_dir, ids[0]).with_suffix('.wb').open('r', encoding='utf8') as f:
+    with Path(rb_dir, ids[0]).open('r', encoding='utf8') as f:
         lines = f.readlines()
         assert_equal('20150609\n', lines[0])
         assert_equal('001BBB8BFFE6841FA498FCE88C43B63A\n', lines[1])
         assert_equal(u'UPDATE - Nanobiotix Gets Early Positive Safety rEsults in Head and Neck Clinical Trial\n',
                      lines[2])
-        print(lines)
-        assert_equal(len(lines), 19)
-        
+        assert_equal(len(lines), 19)        

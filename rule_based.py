@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from puls_util import (separate_title_from_body, get_doc_ids_from_file)
+from puls_util import separate_title_from_body
 from util import get_title_and_content_by_paf
 from label import get_label
 from cap_transform import make_capitalized_title
@@ -41,10 +41,9 @@ def output_labels(doc_ids, good_corpus_dir, bad_corpus_dir):
 
 def make_rule_based_corpus(doc_ids,
                            good_corpus_dir,
-                           bad_corpus_dir,
-                           file_suffix='-with-body'):
+                           bad_corpus_dir):
     for i, id_ in enumerate(doc_ids):
-        if i % 1000 == 0:
+        if i % 100 == 0:
             logger.info("{} / {}".format(i, len(doc_ids)))
 
         good_path = str(Path(good_corpus_dir) / Path(id_))
@@ -52,15 +51,15 @@ def make_rule_based_corpus(doc_ids,
 
         title_tokens = title.split()
         cap_title_tokens = make_capitalized_title(title_words=title_tokens)
-        
-        with (Path(bad_corpus_dir) / Path(id_).with_suffix(file_suffix)
-          ).open('w', encoding='utf8') as f:
+                
+        with (Path(bad_corpus_dir) / Path(id_)).open('w', encoding='utf8') as f:
             f.write(starting_content)
             f.write(' '.join(cap_title_tokens))
             f.write(body)
     
 
 if __name__ == "__main__":
-    output_labels(get_doc_ids_from_file(sys.argv[1]),
-                  sys.argv[2],
-                  sys.argv[3])
+    from puls_util import get_doc_ids_from_file
+    make_rule_based_corpus(get_doc_ids_from_file(sys.argv[1]),
+                           sys.argv[2],
+                           sys.argv[3])
