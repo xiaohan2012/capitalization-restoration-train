@@ -2,68 +2,84 @@ import numpy as np
 import pandas as pds
 
 
-def main(input, labels=['AL', 'IC']):
+def calc(input, labels=['AL', 'IC']):
     """
     Return:
     - Label-wise average
     - Average item accuracy
     - micro/macro  average
     """
-    # precision, recall and f1 for each
-    prf1 = np.zeros(input.shape, dtype=np.float64)
-
-    n_exper, n_label, _ = input.shape
-    for i in xrange(n_exper):
-        # precision
-        prf1[i, :, 0] = input[i, :, 0] / input[i, :, 1]
+    if input.ndim == 2:
+        prf1 = np.zeros(input.shape, dtype=np.float64)
+        prf1[:, 0] = input[:, 0] / input[:, 1]
 
         # recall
-        prf1[i, :, 1] = input[i, :, 0] / input[i, :, 2]
-        
+        prf1[:, 1] = input[:, 0] / input[:, 2]
+            
         # f1
-        prf1[i, :, 2] = (2 * prf1[i, :, 0] * prf1[i, :, 1] /
-                         (prf1[i, :, 0] + prf1[i, :, 1]))
+        prf1[:, 2] = (2 * prf1[:, 0] * prf1[:, 1] /
+                      (prf1[:, 0] + prf1[:, 1]))
+        label_wise = prf1
+        
+        micro_sum = input.sum(axis=0)
+        micro_rec = np.mean(micro_sum[0] / micro_sum[2])
+        micro_prec = np.mean(micro_sum[0] / micro_sum[1])
+        micro_f1 = 2 * (micro_prec * micro_rec) / (micro_prec + micro_rec)
+        m_avg = np.asarray([[micro_prec, micro_rec, micro_f1],
+                            prf1.mean(axis=0)])
+
+        return (label_wise, micro_prec, m_avg)
+    else:
+        # precision, recall and f1 for each
+        prf1 = np.zeros(input.shape, dtype=np.float64)
+
+        n_exper, n_label, _ = input.shape
+        for i in xrange(n_exper):
+            # precision
+            prf1[i, :, 0] = input[i, :, 0] / input[i, :, 1]
+
+            # recall
+            prf1[i, :, 1] = input[i, :, 0] / input[i, :, 2]
+            
+            # f1
+            prf1[i, :, 2] = (2 * prf1[i, :, 0] * prf1[i, :, 1] /
+                             (prf1[i, :, 0] + prf1[i, :, 1]))
+
+        label_wise_avg = prf1.mean(axis=0)
+        
+        # micro
+        micro_prf1 = np.zeros((n_exper, 3))
+        micro_input = input.sum(axis=1)
+        micro_prf1[:, 0] = micro_input[:, 0] / micro_input[:, 1]
+        micro_prf1[:, 1] = micro_input[:, 0] / micro_input[:, 2]
+        micro_prf1[:, 2] = (2 * micro_prf1[:, 0] * micro_prf1[:, 1] /
+                            (micro_prf1[:, 0] + micro_prf1[:, 1]))
+
+        avg_item_acc = np.mean(micro_input[:, 0] / micro_input[:, 2])
+
+        m_avg = np.asarray([prf1.mean(axis=1).mean(axis=0),
+                            micro_prf1.mean(axis=0)])
+        
+        return label_wise_avg, avg_item_acc, m_avg
+
+
+def calc_and_print(input, labels):
+    label_wise_avg, avg_item_acc, m_avg = calc(input, labels)
 
     def make_2d_df(data, index):
         return pds.DataFrame(data, columns=["precision", "recall", "f1"],
                              index=index)
-
-    def make_1d_df(data, name):
-        return pds.DataFrame(data,
-                             columns=["precision", "recall", "f1"])
-
-    prf1_mean = prf1.mean(axis=0)
-    label_wise_avg = make_2d_df(prf1_mean*100, index=labels)
-    
-    # micro
-    micro_prf1 = np.zeros((n_exper, 3))
-    micro_input = input.sum(axis=1)
-    micro_prf1[:, 0] = micro_input[:, 0] / micro_input[:, 1]
-    micro_prf1[:, 1] = micro_input[:, 0] / micro_input[:, 2]
-    micro_prf1[:, 2] = (2 * micro_prf1[:, 0] * micro_prf1[:, 1] /
-                        (micro_prf1[:, 0] + micro_prf1[:, 1]))
-
-    avg_item_acc = np.mean(micro_input[:, 0] / micro_input[:, 2])
-
-    m_avg = make_2d_df([prf1.mean(axis=1).mean(axis=0),
-                        micro_prf1.mean(axis=0)],
-                       index=['micro-average', 'macro-average'])
-    
-    return label_wise_avg, avg_item_acc * 100, m_avg * 100
-
-
-def calc_and_print(input, labels):
-    label_wise_avg, avg_item_acc, m_avg = main(input, labels)
-
+        
     print("Label-wise average:")
-    print(label_wise_avg)
-    
+    print(make_2d_df(label_wise_avg*100, index=labels))
+        
     print('')
     print("Average item accuracy:")
-    print(avg_item_acc)
+    print(avg_item_acc * 100)
 
     print('')
-    print(m_avg)
+    print(make_2d_df(m_avg * 100,
+                     index=['micro-average', 'macro-average']))
 
 
 if __name__ == '__main__':
@@ -88,4 +104,6 @@ if __name__ == '__main__':
                         [(96936, 98997, 97710),
                          (16060, 16834, 18121)]],
                        dtype=np.float64)
+    # input = np.asarray([[125413., 140884., 145074.],
+    #                     [704291., 723952., 719762.]])
     calc_and_print(input, ['AL', 'IC'])
