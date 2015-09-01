@@ -13,7 +13,7 @@ def get_label(word, **kwargs):
     MX: mixed case
     AN: all no case
     """
-    if without_alpha(word):
+    if not word[0].isalpha() or without_alpha(word):
         return "AN"
     else:
         if word[0].isalpha():  # starts with alpha

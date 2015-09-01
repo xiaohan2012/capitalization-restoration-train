@@ -11,20 +11,20 @@ def test_get_label():
     assert_equal(get_label(u'F11'), 'AU')
     assert_equal(get_label(u'B'), 'AU')
     assert_equal(get_label(u'OK'), 'AU')
-    assert_equal(get_label(u'11.5A'), 'AU')
     
     assert_equal(get_label(u'lower'), 'AL')
-    assert_equal(get_label(u'11.5a'), 'AL')
+
     assert_equal(get_label(u'f11'), 'AL')
     
-    assert_equal(get_label(u'/hone/Doc'), 'MX')
     assert_equal(get_label(u'HealthCare'), 'MX')
     assert_equal(get_label(u'SaaS'), 'MX')
     assert_equal(get_label(u'healthCare'), 'MX')
     assert_equal(get_label(u'iPhone'), 'MX')
-    assert_equal(get_label(u'11.5Aa'), 'MX')
 
     assert_equal(get_label(u'$123'), 'AN')
     assert_equal(get_label(u'.'), 'AN')
     assert_equal(get_label(u'.&%*%'), 'AN')
-
+    assert_equal(get_label(u'\'s'), 'AN')
+    assert_equal(get_label(u'11.5a'), 'AN')
+    assert_equal(get_label(u'/hone/Doc'), 'AN')
+    assert_equal(get_label(u'11.5Aa'), 'AN')

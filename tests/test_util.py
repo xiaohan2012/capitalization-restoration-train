@@ -76,7 +76,7 @@ def test_is_monocase():
     )
     
     assert_true(
-        is_monocase("Half of YouTube's Traffic is Now Coming From Mobile: CEO".split())
+        is_monocase("Half of YouTube 's Traffic is Now Coming From Mobile: CEO".split())
     )
     
     assert_true(
@@ -90,5 +90,9 @@ def test_is_monocase():
     # len(ac) == 0
     assert_false(
         is_monocase("Why american airlines threw away paper flight plans in favor of ipads".split())
+    )
+    
+    assert_true(
+        is_monocase("Amy Pascal to Work on Sony 's Spider-Man Team".split())
     )
     
