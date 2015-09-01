@@ -6,7 +6,9 @@ from tabulate import tabulate
 def print_label_error(words,
                       features,
                       correct_labels, predicted_labels,
+                      instance_id=None,
                       target_true_label=None, target_pred_label=None,
+                      excluded_indices=None,
                       print_features=False,
                       model=None,
                       dict_vect=None,
@@ -15,13 +17,23 @@ def print_label_error(words,
         # we want labels that are both
         # incorrect and meet our label specs
         if target_true_label and target_pred_label:
-            display_or_not = map(lambda (cl, pl): cl != pl and
+            display_or_not = map(lambda (i, cl, pl):
+                                 cl != pl and
                                  cl == target_true_label and
-                                 pl == target_pred_label,
-                                 izip(correct_labels, predicted_labels))
+                                 pl == target_pred_label and
+                                 (not excluded_indices or
+                                  i not in excluded_indices),
+                                 izip(xrange(len(correct_labels)),
+                                      correct_labels,
+                                      predicted_labels))
         else:
-            display_or_not = map(lambda (cl, pl): cl != pl,
-                                 izip(correct_labels, predicted_labels))
+            display_or_not = map(lambda (i, cl, pl):
+                                 cl != pl and
+                                 (not excluded_indices or
+                                  i not in excluded_indices),
+                                 izip(xrange(len(correct_labels)),
+                                      correct_labels,
+                                      predicted_labels))
 
         if np.any(display_or_not):
             # add some high lighting
@@ -56,7 +68,7 @@ def print_label_error(words,
                         feat_value = token.get(feat_name, '\\')
                         true_label_weight = get_feature_weight(
                             target_true_label,
-                            feat_name,
+                            feat_pname,
                             token.get(feat_name, None)
                         )
                         pred_label_weight = get_feature_weight(
@@ -69,5 +81,6 @@ def print_label_error(words,
                             pred_label_weight))
 
                     data.append(row)
-
-            print tabulate(data)
+            if instance_id:
+                print instance_id
+            print tabulate(data).encode('utf8')

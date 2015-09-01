@@ -12,11 +12,13 @@ from cap_transform import (make_capitalized_title,
                            make_uppercase_title,
                            make_lowercase_title)
 from data import get_label
+from error_display import print_label_error
 
 import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 def evaluate(predicate_func,
              title_transformation_func,
@@ -114,9 +116,9 @@ def eval_stat(pred_tokens, true_tokens, accepted_labels):
     return ret
 
 
-
 def eval_rule_based(output_path, okform_dir,
-                    accepted_labels=set(['AL', 'IC'])):
+                    accepted_labels=set(['AL', 'IC']),
+                    print_errors=False):
     """
     Return:
     numpy.ndarray: (#label, 3)
@@ -163,11 +165,25 @@ def eval_rule_based(output_path, okform_dir,
                 if is_consistent_prediction(pred_tokens, true_tokens):
                     stat = eval_stat(pred_tokens, true_tokens,
                                      accepted_labels)
+                    if print_errors:
+                        print_label_error(true_tokens,
+                                          # we don't have features here
+                                          features=None,
+                                          instance_id=id_,
+                                          excluded_indices=set([0]),
+                                          correct_labels=map(get_label,
+                                                             true_tokens),
+                                          predicted_labels=map(get_label,
+                                                               pred_tokens),
+                                          target_true_label='AL',
+                                          target_pred_label='IC',
+                                          print_features=False)
                     ret_stat += stat
                     n_errorless += 1
                 else:
                     logger.debug(
-                        'Predicted and true tokens inconsisent:\n{}\n{}\n'.format(pred_tokens, true_tokens)
+                        'Predicted and true tokens inconsisent:\n{}\n{}\n'.format(
+                            pred_tokens, true_tokens)
                     )
             except:
                 logger.error(traceback.format_exc())
@@ -176,9 +192,9 @@ def eval_rule_based(output_path, okform_dir,
                 n_finished += 1
 
     return ret_stat
-    
 
-if __name__  == "__main__":
+
+if __name__ == "__main__":
     # from baseline1 import normalize_title as b1
     # from baseline2 import normalize_title as b2
     # from baseline3 import normalize_title as b3
@@ -187,8 +203,10 @@ if __name__  == "__main__":
     # evaluate(predicate_func=b3, 
     #          title_transformation_func=make_capitalized_title,
     #          pass_doc=True)
-    r = eval_rule_based(output_path='/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/rule-based/predictions.txt',
-                        okform_dir='/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format',
-                        accepted_labels=set(['AL', 'IC']))
+    r = eval_rule_based(
+        output_path='/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/rule-based/predictions.txt',
+        okform_dir='/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format',
+        accepted_labels=set(['AL', 'IC']),
+        print_errors=True)
     print(r)
 
