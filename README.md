@@ -73,6 +73,6 @@ The `pred_err.py` util will print out the error examples as well as confusion ma
 ## Preparing general format data
 
 1. Make sure that the auxil file + paf file about the correct title is there
-3. Make sure that malformed titles(tokenized) are stored in the raw files
+3. Make sure that malformed titles(tokenized and ' '.join(tokens)) are stored in the raw files
 2. Get the doc ids by running `make_puls_data.sh` and the ids are in the `data` dir
 4. Call `output_labels` in `rule_based.py` to save the labels

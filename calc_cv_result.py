@@ -104,6 +104,8 @@ if __name__ == '__main__':
                         [(96936, 98997, 97710),
                          (16060, 16834, 18121)]],
                        dtype=np.float64)
-    # input = np.asarray([[125413., 140884., 145074.],
-    #                     [704291., 723952., 719762.]])
+    input = input.sum(axis=0)
+    print pds.DataFrame(input, columns=['#match', '#model', '#ref'], index=['AL', 'IC'])
+    # input = np.asarray([[704291., 723952., 719762.],
+    #                     [125413., 140884., 145074.]])
     calc_and_print(input, ['AL', 'IC'])

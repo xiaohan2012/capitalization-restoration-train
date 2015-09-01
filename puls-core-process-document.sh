@@ -17,16 +17,19 @@ cap_opt=$2
 if [ ! -z $cap_opt ] && [ "$cap_opt" == "cap" ]; then
 	DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/
 else
-	DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
+	# DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format
+	# dirty...
+	DOC_DIR=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-capitalized/
 fi
 
 echo ${DOC_DIR}
 
 while read docid; do
-	doc_path="${DOC_DIR}/${docid}"
+	doc_path="${DOC_DIR}${docid}"
+	echo ${doc_path}
 	OP="(process-document \"${doc_path}\" :output-format 'JSON :train-capitalization t :suppress-trace t)"
 	if [ ! -f "${DOC_DIR}/${docid}.auxil" ]; then
-		echo "${doc_path}"
+		# echo "${doc_path}"
 		sbcl --core "$CORE" \
 			--noinform \
 			--no-userinit \

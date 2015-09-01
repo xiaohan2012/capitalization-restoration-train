@@ -13,4 +13,5 @@ fi
 while read id; do
 	# rm "${src_corpus_dir}/${id}.auxil"
 	rm "${target_corpus_dir}/${id}.auxil"
+	rm "${target_corpus_dir}/${id}.paf"
 done < $id_file
