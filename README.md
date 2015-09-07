@@ -55,6 +55,10 @@ For CRF classiier, `pred_err.py` will print out the error examples as well as co
 
 For rule-based classifier, `evaluate.py` will do the same role. Note, you need to set `print_errors=True` when  calling `eval_rule_based` in the `evaluate.py` script.
 
+## Trainable document Id path
+
+Documents are filtered by whether their title is trainable(correctly-capitalized) and whether they contain non-empty body, the list of document ids is saved under `data/tmp/2015-08-18/filtered_trainable_doc_ids.txt`
+
 
 ## TODO
 - Add more features to handle mixed-case words, for example: TSX-Venture, or split the word by the hyphen
