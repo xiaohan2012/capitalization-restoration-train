@@ -22,23 +22,28 @@ The other is outputing the labels in separate files for the rule-based classifie
 Run `make_rule_based_corpus.sh`
 
 
-## CRF classifier evaluation
+## Evaluation
+### CRF classifier evaluation
 
 Refer to the comments in `train_puls_model.sh` and comment/uncomment certain lines to do that.
 
-Scores will be saved in target paths as specified in that script.
+Itermediate performance statitics(as they will be processed later) will be saved in target paths as specified in that script.
 
 
-## Rule-based classifier evaluation
+### Rule-based classifier evaluation
 
 Do the following:
 
 - Change the variables in `puls-rule-based-parallel.sh` if you'd like to
 - Run `puls-rule-based-parallel.sh` to use the IE rule-based capitalization recovery tool to process the evaluation data
 - Go to the directory specified by `$result_dir` variable in the `puls-rule-based-parallel.sh` and concatenate all the result files (starting with `id_`) into a whole result file
-- Run `python evaluate.py` to print the result matrix, where rows are the statistics for each label and columns are `#match`, `#model` and `#ref`
+- Run `python evaluate.py` to print the result matrix, where rows are the statistics for each label and columns are `number of match`, `number of predictions y model` and `number of lables in reality`
 
-## 
+### Post processing
+
+Both evaluation scripts print out itermediate result(like number of correct predictions support) for the final scores. You need to run replace the data in `calc_cv_result.py` according to the comment in the script and run it.
+
+
 
 ## Printing error example
 

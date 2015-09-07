@@ -83,6 +83,8 @@ def calc_and_print(input, labels):
 
 
 if __name__ == '__main__':
+    # Repalce the following array for cross validation result
+    # like the result by CRF classiifer
     input = np.asarray([[(97578, 99672, 98268),
                          (16014, 16704, 18108)],
                         [(96629, 98651, 97323),
@@ -106,8 +108,8 @@ if __name__ == '__main__':
                        dtype=np.float64)
     input = input.sum(axis=0)
     print pds.DataFrame(input, columns=['#match', '#model', '#ref'], index=['AL', 'IC'])
-    # input = np.asarray([[704291., 723952., 719762.],
-    #                     [125413., 140884., 145074.]])
+    # Repalce the following array for cross validation result
+    # like the result by rule-based classiifer
     input = np.asarray([[131573.,  148200., 146940.],
                         [763940.,  779307., 780567.]])
     calc_and_print(input, ['AL', 'IC'])
