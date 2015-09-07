@@ -1,6 +1,8 @@
 #!/bin/bash
 
-doc_ids_path="data/tmp/2015-08-18/trainable_doc_ids.txt"
+# doc_ids_path="data/tmp/2015-08-18/trainable_doc_ids.txt"
+doc_ids_path="data/tmp/2015-08-18/filtered_trainable_doc_ids.txt"
+
 result_dir="/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/rule-based"
 puls_task_chunks=16
 
