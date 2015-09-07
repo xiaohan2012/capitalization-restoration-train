@@ -39,9 +39,20 @@ Do the following:
 - Go to the directory specified by `$result_dir` variable in the `puls-rule-based-parallel.sh` and concatenate all the result files (starting with `id_`) into a whole result file
 - Run `python evaluate.py` to print the result matrix, where rows are the statistics for each label and columns are `number of match`, `number of predictions y model` and `number of lables in reality`
 
+
+**short-cut**:
+
+As the data preparation is done, if you want to evaluate rule-based classifier, just run the above plus the final post score processing.
+
 ### Post processing
 
 Both evaluation scripts print out itermediate result(like number of correct predictions support) for the final scores. You need to run replace the data in `calc_cv_result.py` according to the comment in the script and run it.
+
+
+
+## Trainable document Id path
+
+Documents are filtered by whether their title is trainable(correctly-capitalized) and whether they contain non-empty body, the list of document ids is saved under `data/tmp/2015-08-18/filtered_trainable_doc_ids.txt`
 
 
 
@@ -54,10 +65,6 @@ For CRF classiier, `pred_err.py` will print out the error examples as well as co
     > python pred_err.py --model ${DATA_ROOT}/result/feature/cap/1+2+3+4+5+6/model --sent_path ${DATA_ROOT}/corpus/news_title_cap/30000/test.txt --crfsuite_path ${DATA_ROOT}/result/feature/cap/1+2+3+4+5+6/test.crfsuite.txt
 
 For rule-based classifier, `evaluate.py` will do the same role. Note, you need to set `print_errors=True` when  calling `eval_rule_based` in the `evaluate.py` script.
-
-## Trainable document Id path
-
-Documents are filtered by whether their title is trainable(correctly-capitalized) and whether they contain non-empty body, the list of document ids is saved under `data/tmp/2015-08-18/filtered_trainable_doc_ids.txt`
 
 
 ## TODO
