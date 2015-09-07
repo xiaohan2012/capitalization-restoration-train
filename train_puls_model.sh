@@ -21,10 +21,13 @@ cat $train_path | python crfsuite-0.12/example/chunking.py $feature_ids > $resul
 
 # ./crfsuite-0.12/bin/crfsuite learn -e2 ${result_dir}/train.crfsuite.txt ${result_dir}/test.crfsuite.txt > ${result_dir}/result-dev.txt
 
+## The following line is used for cross validation
 # ./crfsuite-0.12/bin/crfsuite learn -g10 -x -l $result_dir/train.crfsuite-${suffix}.txt > $result_dir/cross_validation-${suffix}.txt
 
+## You might need to use all the data for model training after cross validation
+## The following does that
 ./crfsuite-0.12/bin/crfsuite learn -m $result_dir/model-${suffix} $result_dir/train.crfsuite-${suffix}.txt
-# ./crfsuite-0.12/bin/crfsuite tag -qt -m $result_dir/model $result_dir/test.crfsuite.txt > $result_dir/result.txt
+
 
 # remove train data to save space
 # rm $result_dir/train.crfsuite.txt 
