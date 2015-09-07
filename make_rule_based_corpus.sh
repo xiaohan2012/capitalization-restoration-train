@@ -1,6 +1,6 @@
 #! /bin/bash
 
-doc_ids_path=data/tmp/2015-08-18/trainable_doc_ids.txt
+doc_ids_path=data/tmp/2015-08-18/filtered_trainable_doc_ids.txt
 ok_path=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format/
 mal_path=/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format-rule-based
 

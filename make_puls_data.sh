@@ -1,6 +1,6 @@
 #! /bin/bash
 
-doc_ids_path=data/tmp/2015-08-18/doc_ids.txt
+doc_ids_path=data/tmp/2015-08-18/filtered_trainable_doc_ids.txt
 train_path=/cs/taatto/home/hxiao/capitalization-recovery/data/puls-100k/train.txt
 test_path=/cs/taatto/home/hxiao/capitalization-recovery/data/puls-100k/test.txt
 

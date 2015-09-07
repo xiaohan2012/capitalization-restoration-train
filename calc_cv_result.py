@@ -108,4 +108,6 @@ if __name__ == '__main__':
     print pds.DataFrame(input, columns=['#match', '#model', '#ref'], index=['AL', 'IC'])
     # input = np.asarray([[704291., 723952., 719762.],
     #                     [125413., 140884., 145074.]])
+    input = np.asarray([[131573.,  148200., 146940.],
+                        [763940.,  779307., 780567.]])
     calc_and_print(input, ['AL', 'IC'])

@@ -59,20 +59,24 @@ The `pred_err.py` util will print out the error examples as well as confusion ma
 - 
 
 
-## How to produce new data set
+## Producing new data set for CRF classifier
 
-1. `python print_filenames_and_titles.py`: get the file paths and news titles
-2. `python copy_puls_file_to_local.py`: copy the files somewhere writable
-3. `python extract_doc_ids.py`: for `puls_process` script
-4. `puls-core-process-document.sh`: on the doc_ids file
-4. `process_and_save_capitalized_headlines.py`: save the malformed headlines somwhere
-5. `make_data_puls.py`: extract the features
-6. `train_puls_model.sh`: train the model
+Use the working script: `new_data_pipeline.sh`. Basically, it does the above.
 
+Or do the following step by step by hand(not recommended)
 
-## Preparing general format data
+1. `python print_filenames_and_titles.py`: get the file paths and news titles that accords to our requirement(non-monocase title and non-empty article body)
+2. `python copy_puls_file_to_local.py`: copy the files somewhere writable&accessible
+3. `python extract_doc_ids.py`: save the ids of documents to be used
+4. `puls-core-process-document.sh`: using PULS to preprocess the documents. This will generate the `.auxil` files
+5. `process_and_save_capitalized_headlines.py`: save the malformed headlines somewhere
+6. `make_data_puls.py`: extract the features for CRF classifier to use
+7. `train_puls_model.sh`: train the model
 
-1. Make sure that the auxil file + paf file about the correct title is there
-3. Make sure that malformed titles(tokenized and ' '.join(tokens)) are stored in the raw files
-2. Get the doc ids by running `make_puls_data.sh` and the ids are in the `data` dir
-4. Call `output_labels` in `rule_based.py` to save the labels
+## Producing new data set for rule-based classifier
+
+The process is divided into two parts: one part is shared with the data creation process for CRF classifier(step 1 to 5).
+
+The other is outputing the labels for the rule-based classifier to use.
+
+Run `make_rule_based_corpus.sh`

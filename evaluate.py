@@ -175,8 +175,8 @@ def eval_rule_based(output_path, okform_dir,
                                                              true_tokens),
                                           predicted_labels=map(get_label,
                                                                pred_tokens),
-                                          target_true_label='AL',
-                                          target_pred_label='IC',
+                                          target_true_label='IC',
+                                          target_pred_label='AL',
                                           print_features=False)
                     ret_stat += stat
                     n_errorless += 1
@@ -204,9 +204,9 @@ if __name__ == "__main__":
     #          title_transformation_func=make_capitalized_title,
     #          pass_doc=True)
     r = eval_rule_based(
-        output_path='/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/rule-based/predictions.txt',
+        output_path='/cs/taatto/home/hxiao/capitalization-recovery/result/puls-100k/rule-based/predictions-2015-09-07.txt',
         okform_dir='/cs/taatto/home/hxiao/capitalization-recovery/corpus/puls-format',
         accepted_labels=set(['AL', 'IC']),
-        print_errors=True)
+        print_errors=False)
     print(r)
 
